@@ -1,0 +1,35 @@
+# Exclude heavy config tools (maintained in separate repositories)
+ConfigSTR1010/
+ConfigSTR1010+/
+
+# Node.js dependencies
+dashboard-electron/node_modules/
+
+# Build outputs
+dashboard-electron/dist/win-unpacked/
+dashboard-electron/dist/builder-debug.yml
+
+# Logs and temporary files
+*.log
+*.tmp
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache
+*.egg-info/
+.pytest_cache/
+
+# Playwright cache
+.playwright-mcp/

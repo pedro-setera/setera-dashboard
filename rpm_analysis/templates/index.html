@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Dados do Veículo</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group > * {
+            margin-right: 10px;
+        }
+        label {
+            white-space: nowrap;
+        }
+        input[type="datetime-local"] {
+            padding: 5px;
+        }
+        #terminalSelect {
+            width: 300px;
+            margin-right: 30px;
+        }
+        #startTime, #endTime {
+            margin-right: 30px;
+        }
+        #buscarButton {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #loadingMessage {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-group">
+            <label for="terminalSelect">Terminal:</label>
+            <select id="terminalSelect">
+                <option></option>
+                {% for terminal in terminals %}
+                <option value="{{ terminal.id }}">{{ terminal.placa }} (ID: {{ terminal.id }})</option>
+                {% endfor %}
+            </select>
+            <label for="startTime">Hora Inicial:</label>
+            <input type="datetime-local" id="startTime" name="startTime" required>
+            <label for="endTime">Hora Final:</label>
+            <input type="datetime-local" id="endTime" name="endTime">
+            <button id="buscarButton">BUSCAR</button>
+        </div>
+        <div id="loadingMessage" style="display: none;">Carregando dados do gráfico...</div>
+        <canvas id="vehicleDataChart"></canvas>
+    </div>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+</body>
+</html>

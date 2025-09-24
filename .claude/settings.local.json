@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for dir in */)",
+      "Bash(do echo \"=== $dir ===\")",
+      "Bash(ls:*)",
+      "Bash(done)",
+      "Bash(for dir in busca_placa check_cpf config_str1010 gauge rpm_analysis)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

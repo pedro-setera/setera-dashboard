@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando - Gráfico RPM/Odo/Consumo</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .loading-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffffff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+            min-height: 1.5em;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .logs {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="logo">SETERA</div>
+        <div class="spinner"></div>
+        <div class="status" id="status">Iniciando servidor...</div>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="logs" id="logs"></div>
+        <div class="error" id="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        let progress = 0;
+        let maxTime = 45000; // 45 seconds total timeout
+        let attempts = 0;
+        let serverReady = false;
+        let startTime = Date.now();
+        let retryDelay = 500; // Start with 500ms delay
+        let consecutiveFailures = 0;
+
+        const statusEl = document.getElementById('status');
+        const progressBar = document.getElementById('progress-bar');
+        const logsEl = document.getElementById('logs');
+        const errorEl = document.getElementById('error');
+
+        // Enhanced progress steps with retry awareness
+        const progressSteps = [
+            { progress: 15, message: "Iniciando servidor Flask..." },
+            { progress: 30, message: "Carregando configurações..." },
+            { progress: 45, message: "Conectando ao banco de dados..." },
+            { progress: 60, message: "Estabelecendo conexões..." },
+            { progress: 75, message: "Preparando interface..." },
+            { progress: 90, message: "Finalizando inicialização..." }
+        ];
+
+        let currentStep = 0;
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'retry' ? '🔄' : type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            logsEl.innerHTML += `[${timestamp}] ${icon} ${message}<br>`;
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        function updateProgress() {
+            if (currentStep < progressSteps.length && !serverReady) {
+                const step = progressSteps[currentStep];
+                progress = step.progress;
+                statusEl.textContent = step.message;
+                progressBar.style.width = progress + '%';
+                addLog(step.message);
+                currentStep++;
+            }
+        }
+
+        function getRetryDelay(attemptNumber) {
+            // Much more conservative delays - minimum 5 seconds between retries
+            const delays = [
+                3000,   // 1st attempt: wait 3s after initial load
+                7000,   // 2nd attempt: wait 7s (server needs time to initialize)
+                6000,   // 3rd attempt: wait 6s
+                8000,   // 4th attempt: wait 8s
+                10000,  // 5th attempt: wait 10s
+                12000   // 6th+ attempts: wait 12s
+            ];
+
+            if (attemptNumber <= delays.length) {
+                return delays[attemptNumber - 1];
+            }
+            return 15000; // 15s for attempts beyond 6th
+        }
+
+        function scheduleNextCheck() {
+            if (serverReady) return;
+
+            const delay = getRetryDelay(attempts + 1);
+            const nextAttemptTime = new Date(Date.now() + delay);
+            const timeStr = nextAttemptTime.toLocaleTimeString();
+
+            addLog(`Próxima tentativa em ${Math.floor(delay/1000)}s (às ${timeStr})`, 'retry');
+
+            setTimeout(checkServer, delay);
+        }
+
+        function checkServer() {
+            attempts++;
+            const elapsed = Date.now() - startTime;
+
+            // Check if we've exceeded max time (60 seconds now for more reasonable timeout)
+            if (elapsed > 60000) {
+                statusEl.textContent = "Erro: Servidor não respondeu no tempo esperado";
+                errorEl.style.display = 'block';
+                errorEl.innerHTML = `
+                    <strong>Servidor Flask não iniciou dentro do tempo limite (60s).</strong><br>
+                    Tentativas realizadas: ${attempts}<br><br>
+                    <strong>Isso pode indicar:</strong><br>
+                    • Problemas com a conexão ao banco de dados<br>
+                    • Servidor PostgreSQL offline ou inacessível<br>
+                    • Porta 5004 ocupada por outro processo<br>
+                    • Configurações de rede ou firewall<br>
+                    <br>
+                    <strong>Soluções recomendadas:</strong><br>
+                    • Verificar se PostgreSQL está executando<br>
+                    • Conferir configurações em rpm_analysis/config.ini<br>
+                    • Verificar log detalhado: rpm_analysis/rpm_analysis.log<br>
+                    • Reiniciar o dashboard e tentar novamente
+                `;
+                addLog(`Timeout final após ${attempts} tentativas em ${Math.floor(elapsed/1000)}s`, 'error');
+                return;
+            }
+
+            // Show attempt info
+            statusEl.textContent = `Verificando servidor... (tentativa ${attempts})`;
+            addLog(`Tentativa ${attempts}: Verificando banco de dados`, 'info');
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per request
+
+            fetch('/check_ready', {
+                method: 'GET',
+                signal: controller.signal,
+                cache: 'no-cache'
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'ready') {
+                    serverReady = true;
+                    statusEl.textContent = "Servidor pronto! Redirecionando...";
+                    progressBar.style.width = '100%';
+
+                    const totalTime = Math.floor(elapsed/1000);
+                    addLog(`✅ Servidor conectado com sucesso! (${totalTime}s, ${attempts} tentativas)`, 'success');
+                    addLog('🚀 Redirecionando para aplicação...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    throw new Error(`Server not ready: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+
+                if (elapsed > 60000) {
+                    return; // Already handled above
+                }
+
+                // Update progress on certain attempts
+                if (attempts === 2 && currentStep < 3) updateProgress();
+                if (attempts === 4 && currentStep < 5) updateProgress();
+
+                // Log the specific error
+                let errorMsg = 'Servidor ainda não está pronto';
+                if (error.name === 'AbortError') {
+                    errorMsg = 'Timeout na conexão (>10s)';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg = 'Servidor Flask ainda inicializando';
+                }
+
+                addLog(`❌ ${errorMsg}`, 'retry');
+
+                // Schedule next attempt with proper delay
+                scheduleNextCheck();
+            });
+        }
+
+        // Initialize with clear messaging
+        addLog("🚀 Iniciando servidor Flask em background...");
+        addLog("⏳ Aguardando inicialização completa...");
+        updateProgress();
+
+        // Start first check after giving server time to start (3 seconds)
+        addLog("⏰ Primeira verificação em 3 segundos...");
+        setTimeout(checkServer, 3000);
+
+        // Update progress more conservatively
+        const progressInterval = setInterval(() => {
+            if (serverReady) {
+                clearInterval(progressInterval);
+                return;
+            }
+
+            // Auto-advance progress based on time elapsed (slower progression)
+            const elapsed = Date.now() - startTime;
+            if (elapsed > 8000 && currentStep < 2) updateProgress();
+            if (elapsed > 18000 && currentStep < 4) updateProgress();
+            if (elapsed > 35000 && currentStep < 5) updateProgress();
+        }, 5000);
+    </script>
+</body>
+</html>

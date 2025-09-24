@@ -1,0 +1,79 @@
+# SETERA Dashboard - Electron Desktop Application
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ installed
+- Python 3.x installed (for launching tools)
+
+### Installation
+1. Navigate to this directory in terminal/command prompt
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Development
+Run in development mode:
+```bash
+npm run dev
+```
+
+### Building Portable Executable
+
+To create a portable executable for distribution:
+
+```bash
+npm run dist
+```
+
+This will create:
+- `dist/SETERA-Dashboard-1.2.0-portable.exe` - Portable executable
+
+### Distribution
+
+1. The portable executable is self-contained
+2. Users should place the entire `dist` folder on their computers
+3. Users can create their own desktop shortcuts to the `.exe` file
+4. **Important**: The tools directory must be available relative to the executable
+
+## 📁 Project Structure
+
+```
+dashboard-electron/
+├── src/
+│   ├── main.js          # Electron main process
+│   ├── preload.js       # Preload script for security
+│   └── renderer/        # Web UI files
+│       ├── dashboard.html
+│       └── static/
+├── assets/
+│   └── icon.ico        # Application icon
+├── package.json
+└── README.md
+```
+
+## ⚡ Features
+
+- **Instant startup** - No server startup delay
+- **Maximized window** - Starts maximized automatically
+- **Portable** - Single executable, no installation required
+- **Same UI** - Identical interface to web version
+- **Python integration** - Launches all existing tools
+- **Search functionality** - Fast application search
+- **Keyboard shortcuts** - Ctrl+F, F11, etc.
+
+## 🛠️ Technical Details
+
+- **Frontend**: HTML5, CSS3, JavaScript (same as original)
+- **Backend**: Express.js server embedded in Electron
+- **Process**: Node.js child_process for launching applications
+- **Security**: Context isolation enabled
+- **Build**: Electron Builder for packaging
+
+## 📋 Build Notes
+
+- The app expects the tools to be in a relative `tools` directory
+- In development mode (`--dev`), it looks for tools in `../../..` (relative to project)
+- In production, it looks for tools relative to the executable location
+- All Python scripts are launched with proper working directories
