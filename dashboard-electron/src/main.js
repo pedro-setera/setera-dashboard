@@ -129,13 +129,25 @@ expressApp.post('/launch-stm32', async (req, res) => {
       stdio: 'ignore'
     });
 
+    // Set up error handler before sending response
+    let responseSent = false;
+
     result.on('error', (err) => {
       console.error('Failed to launch STM32 Cube Programmer:', err);
-      res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${err.message}` });
+      if (!responseSent) {
+        responseSent = true;
+        res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${err.message}` });
+      }
     });
 
-    result.unref();
-    res.json({ success: true, message: 'STM32 Cube Programmer iniciado com sucesso' });
+    // Give a small delay to catch immediate errors
+    setTimeout(() => {
+      if (!responseSent) {
+        responseSent = true;
+        result.unref();
+        res.json({ success: true, message: 'STM32 Cube Programmer iniciado com sucesso' });
+      }
+    }, 100);
 
   } catch (error) {
     res.json({ success: false, error: error.message });
