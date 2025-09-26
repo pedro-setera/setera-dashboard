@@ -223,14 +223,25 @@ expressApp.post('/launch', async (req, res) => {
             stdio: 'ignore'
           });
 
+          let responseSent = false;
+
           // Add error handler to prevent uncaught exceptions
           result.on('error', (err) => {
             console.error('Failed to launch elevated process:', err);
-            res.json({ success: false, error: `Erro ao iniciar aplicação com privilégios administrativos: ${err.message}` });
+            if (!responseSent) {
+              responseSent = true;
+              res.json({ success: false, error: `Erro ao iniciar aplicação com privilégios administrativos: ${err.message}` });
+            }
           });
 
-          result.unref();
-          res.json({ success: true, message: 'Aplicação com privilégios administrativos iniciada com sucesso' });
+          // Give a small delay to catch immediate errors
+          setTimeout(() => {
+            if (!responseSent) {
+              responseSent = true;
+              result.unref();
+              res.json({ success: true, message: 'Aplicação com privilégios administrativos iniciada com sucesso' });
+            }
+          }, 100);
         } else {
           // Fallback: try regular spawn and let Windows handle UAC
           console.log('elevate.exe not found, trying direct spawn');
@@ -240,14 +251,25 @@ expressApp.post('/launch', async (req, res) => {
             stdio: 'ignore'
           });
 
+          let responseSent = false;
+
           // Add error handler to prevent uncaught exceptions
           result.on('error', (err) => {
             console.error('Failed to launch process directly:', err);
-            res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
+            if (!responseSent) {
+              responseSent = true;
+              res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
+            }
           });
 
-          result.unref();
-          res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
+          // Give a small delay to catch immediate errors
+          setTimeout(() => {
+            if (!responseSent) {
+              responseSent = true;
+              result.unref();
+              res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
+            }
+          }, 100);
         }
       } else {
         // Regular executable files
@@ -257,14 +279,25 @@ expressApp.post('/launch', async (req, res) => {
           stdio: 'ignore'
         });
 
+        let responseSent = false;
+
         // Add error handler to prevent uncaught exceptions
         result.on('error', (err) => {
           console.error('Failed to launch regular process:', err);
-          res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
+          if (!responseSent) {
+            responseSent = true;
+            res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
+          }
         });
 
-        result.unref();
-        res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
+        // Give a small delay to catch immediate errors
+        setTimeout(() => {
+          if (!responseSent) {
+            responseSent = true;
+            result.unref();
+            res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
+          }
+        }, 100);
       }
 
     } else {
