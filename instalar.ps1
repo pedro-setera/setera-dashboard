@@ -23,7 +23,7 @@ $PIP_PACKAGES = @(
     "numpy",
     "scipy",
     "asammdf",
-    "telnetlib"
+    "standard-telnetlib"
 )
 
 # Colors for output

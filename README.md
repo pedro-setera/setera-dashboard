@@ -84,7 +84,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 #### Python Dependencies
 Install required Python packages for all tools:
 ```bash
-pip install psycopg2-binary pandas matplotlib seaborn flask xlsxwriter PyQt6 python-can canalystii pywin32 pyqtgraph numpy scipy asammdf telnetlib
+pip install psycopg2-binary pandas matplotlib seaborn flask xlsxwriter PyQt6 python-can canalystii pywin32 pyqtgraph numpy scipy asammdf standard-telnetlib
 ```
 
 **Note:** The following packages are required for specific tools:
