@@ -15,8 +15,7 @@ class SimuladorTiltSensor:
     def __init__(self, root):
         self.root = root
         self.root.title("Simulador Tilt Sensor")
-        self.root.geometry("1500x230")
-        #self.root.state('zoomed')
+        self.root.state('zoomed')
         self.root.iconbitmap(os.path.join(application_path, 'favicon.ico'))
 
         self.current_values = {"Pitch": -3, "Roll": 2, "Temperatura(⁰C)": 21}

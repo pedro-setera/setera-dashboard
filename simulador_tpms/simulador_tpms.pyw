@@ -15,8 +15,7 @@ class SimuladorTPMS:
     def __init__(self, root):
         self.root = root
         self.root.title("Simulador TPMS")
-        self.root.geometry("1500x230")
-        #self.root.state('zoomed')  # Open window maximized
+        self.root.state('zoomed')  # Open window maximized
         self.root.iconbitmap(os.path.join(application_path, 'favicon.ico'))
         self.running = False
 

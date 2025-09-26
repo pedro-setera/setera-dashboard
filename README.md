@@ -40,12 +40,12 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **rpm_analysis** - RPM data analysis with web interface
 - **gauge** - Real-time gauge display
 - **tpms** - Tire Pressure Monitoring System tools
-- **simulador_tpms** - TPMS simulator
+- **simulador_tpms** - TPMS simulator (now opens maximized)
 
 ### Specialized Tools
 - **SimulaCAN** - CAN bus recorder/simulator with CANalyst-II support
-- **simulador_can_visual** - Visual CAN bus simulator
-- **simulador_tilt** - Tilt sensor simulator
+- **simulador_can_visual** - Visual CAN bus simulator (now opens maximized)
+- **simulador_tilt** - Tilt sensor simulator (now opens maximized)
 - **check_cpf** - CPF validation utility
 - **config_str1010** - STR1010 configuration utility
 

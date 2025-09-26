@@ -15,7 +15,7 @@ class SimuladorCANBUS:
     def __init__(self, root):
         self.root = root
         self.root.title("Simulador CANBUS Visual")
-        self.root.geometry("1200x700")
+        self.root.state('zoomed')
         self.root.iconbitmap(os.path.join(application_path, 'favicon.ico'))
 
         self.initial_canbus_string = "FR1,2,81329.10,69891.76,123,60,60,1215,53,92,270102,236529,33573,52.750,15872,0,255,12,6.9,3109,275,75,120"
