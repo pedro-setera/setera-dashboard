@@ -101,6 +101,39 @@ async function launchApp(appPath) {
     }
 }
 
+// Launch STM32 Cube Programmer
+async function launchSTM32Programmer() {
+    // Show loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+
+    try {
+        // Send request to Express backend to launch STM32 Cube Programmer
+        const response = await fetch('/launch-stm32', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Success feedback
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 1500);
+        } else {
+            // Error handling
+            overlay.classList.remove('active');
+            alert(`Erro ao abrir STM32 Cube Programmer: ${result.error}`);
+        }
+    } catch (error) {
+        overlay.classList.remove('active');
+        alert(`Erro de conexão: ${error.message}\nVerifique se o servidor interno está funcionando.`);
+    }
+}
+
 // Keyboard Shortcuts
 function initializeKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
@@ -183,7 +216,7 @@ function addHoverEffects() {
 addHoverEffects();
 
 // Console welcome message (Electron version)
-console.log('%c SETERA Ferramentas v1.2 - Desktop App ', 'background: #0984e3; color: white; font-size: 16px; padding: 5px 10px; border-radius: 5px;');
+console.log('%c SETERA Ferramentas v1.4 - Desktop App ', 'background: #0984e3; color: white; font-size: 16px; padding: 5px 10px; border-radius: 5px;');
 console.log('%c Dashboard Electron carregado com sucesso! ', 'color: #74b9ff; font-size: 12px;');
 console.log('%c Atalhos: Ctrl+F (busca), F11 (tela cheia) ', 'color: #a0a0a0; font-size: 10px;');
 console.log('%c Desktop app - nenhum servidor externo necessário ', 'color: #00b894; font-size: 10px;');

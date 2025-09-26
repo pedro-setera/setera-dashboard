@@ -107,7 +107,39 @@ expressApp.get('/', (req, res) => {
 });
 
 expressApp.get('/status', (req, res) => {
-  res.json({ status: 'running', version: '1.2' });
+  res.json({ status: 'running', version: '1.4' });
+});
+
+expressApp.post('/launch-stm32', async (req, res) => {
+  try {
+    // Fixed path for STM32 Cube Programmer
+    const stm32Path = 'C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32CubeProgrammer.exe';
+
+    // Check if STM32 Cube Programmer exists
+    if (!fs.existsSync(stm32Path)) {
+      return res.json({
+        success: false,
+        error: 'STM32 Cube Programmer não encontrado. Por favor, verifique se está instalado em C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\'
+      });
+    }
+
+    // Launch STM32 Cube Programmer
+    const result = spawn(stm32Path, [], {
+      detached: true,
+      stdio: 'ignore'
+    });
+
+    result.on('error', (err) => {
+      console.error('Failed to launch STM32 Cube Programmer:', err);
+      res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${err.message}` });
+    });
+
+    result.unref();
+    res.json({ success: true, message: 'STM32 Cube Programmer iniciado com sucesso' });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
 });
 
 expressApp.post('/launch', async (req, res) => {
@@ -274,7 +306,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, '../assets/logo.ico'),
-    title: 'SETERA Ferramentas v1.3 - 24Set2025',
+    title: 'SETERA Ferramentas v1.4 - 26Set2025',
     autoHideMenuBar: true
   });
 

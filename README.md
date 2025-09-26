@@ -70,8 +70,16 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 #### Python Dependencies
 Install required Python packages for all tools:
 ```bash
-pip install psycopg2-binary pandas matplotlib seaborn flask
+pip install psycopg2-binary pandas matplotlib seaborn flask xlsxwriter
 ```
+
+**Note:** The following packages are required for specific tools:
+- **psycopg2-binary**: PostgreSQL database adapter (used by `odo_gps_can_stats` and `rpm_analysis`)
+- **pandas**: Data analysis library (used by `odo_gps_can_stats`)
+- **matplotlib**: Plotting library (used by `odo_gps_can_stats`)
+- **seaborn**: Statistical visualization (used by `odo_gps_can_stats`)
+- **flask**: Web framework (used by `rpm_analysis`)
+- **xlsxwriter**: Excel file creation (dependency of pandas for Excel export in `odo_gps_can_stats`)
 
 #### Build Setup
 ```bash
