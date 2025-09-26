@@ -98,7 +98,9 @@ function Install-Python {
         Start-Process -FilePath $tempPath -ArgumentList $installArgs -Wait
 
         # Refresh environment variables
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $env:Path = $machinePath + ";" + $userPath
 
         # Wait a moment for installation to complete
         Start-Sleep -Seconds 3
@@ -156,14 +158,16 @@ function Disable-SmartScreen {
     Write-ColorOutput $CYAN "🛡️  Desabilitando Windows SmartScreen..."
 
     try {
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" -Name SmartScreenEnabled -Value Off
+        $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer"
+        Set-ItemProperty -Path $registryPath -Name SmartScreenEnabled -Value Off
         Write-ColorOutput $GREEN "✅ Windows SmartScreen desabilitado com sucesso!"
         Write-ColorOutput $GREEN "   ℹ️  Isto elimina os avisos de segurança para executáveis não assinados."
     }
     catch {
         Write-ColorOutput $RED "❌ Erro ao desabilitar SmartScreen: $($_.Exception.Message)"
         Write-ColorOutput $YELLOW "⚠️  Você pode desabilitar manualmente executando como administrador:"
-        Write-ColorOutput $YELLOW "   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -Name SmartScreenEnabled -Value Off"
+        Write-ColorOutput $YELLOW "   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer'"
+        Write-ColorOutput $YELLOW "                        -Name SmartScreenEnabled -Value Off"
     }
 }
 
