@@ -56,10 +56,23 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 ## 📦 Installation & Distribution
 
 ### For End Users
+
+#### Option 1: Automated Installation (Recommended)
 1. Download the complete `setera-tools` folder
-2. Navigate to `dashboard-electron/dist/`
+2. **Right-click** `instalar.bat` and select **"Run as administrator"**
+3. The script will automatically:
+   - Install Python (if not present)
+   - Install all required Python packages
+   - Disable Windows SmartScreen warnings
+4. Navigate to `dashboard-electron/dist/win-unpacked/`
+5. Run `SETERA-Ferramentas.exe`
+
+#### Option 2: Manual Installation
+1. Download the complete `setera-tools` folder
+2. Navigate to `dashboard-electron/dist/win-unpacked/`
 3. Run `SETERA-Ferramentas.exe`
-4. Create desktop shortcuts as needed
+4. Install Python dependencies manually if needed
+5. Create desktop shortcuts as needed
 
 ### For Developers
 
@@ -165,6 +178,15 @@ The following tools require administrator privileges and will automatically trig
 **UAC/Admin issues:**
 - Run as administrator if UAC prompts fail
 - Check Windows security settings
+
+**Windows SmartScreen warnings:**
+- Unsigned executables may trigger SmartScreen warnings
+- **Solution**: Run as administrator in PowerShell:
+  ```powershell
+  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" -Name SmartScreenEnabled -Value Off
+  ```
+- **Alternative**: Use the automated installation script `instalar.ps1` in the root folder
+- This affects: `SETERA-Ferramentas.exe` and `update-fw-str1010.exe`
 
 ### Debug Information
 The application logs debug information to the console. In case of issues:
