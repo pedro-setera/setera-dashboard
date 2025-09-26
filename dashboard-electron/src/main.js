@@ -4,6 +4,50 @@ const express = require('express');
 const { spawn, exec, execFile } = require('child_process');
 const fs = require('fs');
 
+// Centralized executable launcher with automatic elevation detection
+const launchExecutable = (exePath, res) => {
+  // Check if file exists
+  if (!fs.existsSync(exePath)) {
+    return res.json({
+      success: false,
+      error: `Arquivo não encontrado: ${exePath}`
+    });
+  }
+
+  // List of keywords that typically indicate admin/elevation is required
+  const elevationKeywords = [
+    'update', 'install', 'setup', 'config', 'admin',
+    'fw', 'firmware', 'driver', 'uninstall'
+  ];
+
+  // Check if executable name suggests it needs elevation
+  const fileName = path.basename(exePath).toLowerCase();
+  const needsElevation = elevationKeywords.some(keyword => fileName.includes(keyword));
+
+  if (needsElevation) {
+    console.log(`Launching with potential elevation: ${fileName}`);
+  }
+
+  // Use exec with quotes to handle spaces in paths
+  // Windows will automatically prompt for UAC if needed
+  exec(`"${exePath}"`, { cwd: path.dirname(exePath) }, (error, stdout, stderr) => {
+    if (error && error.code !== null) {
+      console.error(`Failed to launch ${fileName}:`, error);
+      res.json({
+        success: false,
+        error: `Erro ao iniciar aplicação: ${error.message}`
+      });
+    } else {
+      res.json({
+        success: true,
+        message: needsElevation
+          ? 'Aplicação com privilégios administrativos iniciada com sucesso'
+          : 'Aplicação iniciada com sucesso'
+      });
+    }
+  });
+};
+
 let mainWindow;
 let server;
 const PORT = 3000;
@@ -115,7 +159,7 @@ expressApp.post('/launch-stm32', async (req, res) => {
     // Fixed path for STM32 Cube Programmer
     const stm32Path = 'C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32CubeProgrammer.exe';
 
-    // Check if STM32 Cube Programmer exists
+    // Special check for STM32 with custom error message
     if (!fs.existsSync(stm32Path)) {
       return res.json({
         success: false,
@@ -123,15 +167,8 @@ expressApp.post('/launch-stm32', async (req, res) => {
       });
     }
 
-    // Use exec with quotes to handle spaces in path properly
-    exec(`"${stm32Path}"`, (error, stdout, stderr) => {
-      if (error && error.code !== null) {
-        console.error('Failed to launch STM32 Cube Programmer:', error);
-        res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${error.message}` });
-      } else {
-        res.json({ success: true, message: 'STM32 Cube Programmer iniciado com sucesso' });
-      }
-    });
+    // Use centralized launcher
+    launchExecutable(stm32Path, res);
 
   } catch (error) {
     res.json({ success: false, error: error.message });
@@ -198,34 +235,8 @@ expressApp.post('/launch', async (req, res) => {
       }
 
     } else if (fullPath.endsWith('.exe')) {
-      // Executable files
-      const fileName = path.basename(fullPath);
-
-      // Check if this executable requires elevation (admin privileges)
-      const requiresElevation = fileName.includes('update-fw-str1010');
-
-      if (requiresElevation) {
-        // For admin-required executables, use exec with quotes to handle paths properly
-        // Windows will show UAC prompt automatically
-        exec(`"${fullPath}"`, { cwd: path.dirname(fullPath) }, (error, stdout, stderr) => {
-          if (error && error.code !== null) {
-            console.error('Failed to launch elevated process:', error);
-            res.json({ success: false, error: `Erro ao iniciar aplicação com privilégios administrativos: ${error.message}` });
-          } else {
-            res.json({ success: true, message: 'Aplicação com privilégios administrativos iniciada com sucesso' });
-          }
-        });
-      } else {
-        // Regular executable files - use exec for better path handling
-        exec(`"${fullPath}"`, { cwd: path.dirname(fullPath) }, (error, stdout, stderr) => {
-          if (error && error.code !== null) {
-            console.error('Failed to launch regular process:', error);
-            res.json({ success: false, error: `Erro ao iniciar aplicação: ${error.message}` });
-          } else {
-            res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
-          }
-        });
-      }
+      // Use centralized launcher for ALL executables
+      launchExecutable(fullPath, res);
 
     } else {
       res.json({ success: false, error: 'Tipo de arquivo não suportado' });
