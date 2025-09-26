@@ -86,10 +86,10 @@ async function launchApp(appPath) {
         const result = await response.json();
 
         if (result.success) {
-            // Success feedback
+            // Success feedback - shorter timeout for better UX
             setTimeout(() => {
                 overlay.classList.remove('active');
-            }, 1500);
+            }, 800);
         } else {
             // Error handling
             overlay.classList.remove('active');
@@ -119,10 +119,10 @@ async function launchSTM32Programmer() {
         const result = await response.json();
 
         if (result.success) {
-            // Success feedback
+            // Success feedback - shorter timeout for better UX
             setTimeout(() => {
                 overlay.classList.remove('active');
-            }, 1500);
+            }, 800);
         } else {
             // Error handling
             overlay.classList.remove('active');

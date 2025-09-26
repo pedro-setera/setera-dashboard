@@ -28,24 +28,54 @@ const launchExecutable = (exePath, res) => {
     console.log(`Launching with potential elevation: ${fileName}`);
   }
 
-  // Use exec with quotes to handle spaces in paths
-  // Windows will automatically prompt for UAC if needed
-  exec(`"${exePath}"`, { cwd: path.dirname(exePath) }, (error, stdout, stderr) => {
-    if (error && error.code !== null) {
-      console.error(`Failed to launch ${fileName}:`, error);
-      res.json({
-        success: false,
-        error: `Erro ao iniciar aplicação: ${error.message}`
-      });
-    } else {
-      res.json({
-        success: true,
-        message: needsElevation
-          ? 'Aplicação com privilégios administrativos iniciada com sucesso'
-          : 'Aplicação iniciada com sucesso'
-      });
-    }
-  });
+  try {
+    // For paths with spaces, we need to use shell: true with proper quoting
+    // Use spawn with detached to not wait for process to complete
+    const child = spawn(`"${exePath}"`, [], {
+      cwd: path.dirname(exePath),
+      detached: true,
+      stdio: 'ignore',
+      shell: true  // Important for handling paths with spaces on Windows
+    });
+
+    // Track if we've sent a response
+    let responseSent = false;
+
+    child.on('error', (error) => {
+      if (!responseSent) {
+        responseSent = true;
+        console.error(`Failed to launch ${fileName}:`, error);
+        res.json({
+          success: false,
+          error: `Erro ao iniciar aplicação: ${error.message}`
+        });
+      }
+    });
+
+    // Unref the child process so our app doesn't wait for it
+    child.unref();
+
+    // Send success response after a very short delay to catch immediate errors
+    // But don't wait for the application to actually open or close
+    setTimeout(() => {
+      if (!responseSent) {
+        responseSent = true;
+        res.json({
+          success: true,
+          message: needsElevation
+            ? 'Aplicação com privilégios administrativos iniciada com sucesso'
+            : 'Aplicação iniciada com sucesso'
+        });
+      }
+    }, 200); // 200ms is enough to catch immediate launch errors
+
+  } catch (error) {
+    console.error(`Exception launching ${fileName}:`, error);
+    res.json({
+      success: false,
+      error: `Erro ao iniciar aplicação: ${error.message}`
+    });
+  }
 };
 
 let mainWindow;
