@@ -15,7 +15,7 @@
   "license": "ISC",
   "build": {
     "appId": "com.setera.ferramentas",
-    "productName": "SETERA Ferramentas",
+    "productName": "SETERA-Ferramentas",
     "directories": {
       "output": "dist"
     },
