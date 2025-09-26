@@ -22,7 +22,8 @@ $PIP_PACKAGES = @(
     "pyqtgraph",
     "numpy",
     "scipy",
-    "asammdf"
+    "asammdf",
+    "telnetlib"
 )
 
 # Colors for output
