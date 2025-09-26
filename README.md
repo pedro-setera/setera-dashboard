@@ -6,12 +6,12 @@ A modern desktop dashboard for managing and launching SETERA's suite of developm
 
 ## 🚀 Overview
 
-The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 22+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
+The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 23+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
 
 ## 📋 Features
 
 - **Instant Startup**: Desktop application launches in under 1 second
-- **22+ Integrated Tools**: Easy access to all SETERA development utilities
+- **23+ Integrated Tools**: Easy access to all SETERA development utilities
 - **Modern Interface**: Clean, responsive design with search functionality
 - **Portable Distribution**: Single executable with no installation required
 - **Administrative Privileges**: Automatic UAC elevation for tools requiring admin rights
@@ -43,6 +43,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **simulador_tpms** - TPMS simulator
 
 ### Specialized Tools
+- **SimulaCAN** - CAN bus recorder/simulator with CANalyst-II support
 - **simulador_can_visual** - Visual CAN bus simulator
 - **simulador_tilt** - Tilt sensor simulator
 - **check_cpf** - CPF validation utility
@@ -70,16 +71,24 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 #### Python Dependencies
 Install required Python packages for all tools:
 ```bash
-pip install psycopg2-binary pandas matplotlib seaborn flask xlsxwriter
+pip install psycopg2-binary pandas matplotlib seaborn flask xlsxwriter PyQt6 python-can canalystii pywin32 pyqtgraph numpy scipy asammdf
 ```
 
 **Note:** The following packages are required for specific tools:
 - **psycopg2-binary**: PostgreSQL database adapter (used by `odo_gps_can_stats` and `rpm_analysis`)
 - **pandas**: Data analysis library (used by `odo_gps_can_stats`)
-- **matplotlib**: Plotting library (used by `odo_gps_can_stats`)
+- **matplotlib**: Plotting library (used by `odo_gps_can_stats`, `SimulaCAN`)
 - **seaborn**: Statistical visualization (used by `odo_gps_can_stats`)
 - **flask**: Web framework (used by `rpm_analysis`)
 - **xlsxwriter**: Excel file creation (dependency of pandas for Excel export in `odo_gps_can_stats`)
+- **PyQt6**: GUI framework (used by `SimulaCAN`)
+- **python-can**: CAN bus library (used by `SimulaCAN`)
+- **canalystii**: CANalyst-II device driver (used by `SimulaCAN`)
+- **pywin32**: Windows API access (used by `SimulaCAN`)
+- **pyqtgraph**: Real-time plotting (used by `SimulaCAN`)
+- **numpy**: Numerical computing (used by `SimulaCAN`)
+- **scipy**: Scientific computing (used by `SimulaCAN`)
+- **asammdf**: MF4 file format support (used by `SimulaCAN`)
 
 #### Build Setup
 ```bash
@@ -179,5 +188,5 @@ For technical support or questions:
 
 ---
 
-**SETERA Ferramentas v1.3 - 24Set2025**
+**SETERA Ferramentas v1.4 - 26Set2025**
 Built with ❤️ using Electron and Node.js

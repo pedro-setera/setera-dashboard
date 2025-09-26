@@ -1,0 +1,118 @@
+🔧 Converting '00000001.MF4' to 'original_truck_log.asc'...
+============================================================
+📖 Reading MF4 file...
+✅ MF4 file opened successfully
+   Version: 4.11
+   Channels: 44
+📡 Found 21 CAN-related channels:
+   - CAN_DataFrame
+   - CAN_DataFrame.BusChannel
+   - CAN_DataFrame.ID
+   - CAN_DataFrame.IDE
+   - CAN_DataFrame.DLC
+   - CAN_DataFrame.DataLength
+   - CAN_DataFrame.DataBytes
+   - CAN_DataFrame.Dir
+   - CAN_DataFrame.EDL
+   - CAN_DataFrame.ESI
+   ... and 11 more
+   Using CAN_DataFrame channels (preferred)
+
+🔍 Structured CAN channels found:
+   ID Channel: CAN_DataFrame.ID
+   IDE Channel: CAN_DataFrame.IDE
+   DLC Channel: CAN_DataFrame.DLC
+   Data Channel: CAN_DataFrame.DataBytes
+
+📡 Extracting correlated CAN messages...
+   Signal lengths: ID=118037, IDE=118037, DLC=118037, Data=118037
+   Processing 118037 CAN messages...
+   Processed 10,000/118,037 messages...
+   Processed 20,000/118,037 messages...
+   Processed 30,000/118,037 messages...
+   Processed 40,000/118,037 messages...
+   Processed 50,000/118,037 messages...
+   Processed 60,000/118,037 messages...
+   Processed 70,000/118,037 messages...
+   Processed 80,000/118,037 messages...
+   Processed 90,000/118,037 messages...
+   Processed 100,000/118,037 messages...
+   Processed 110,000/118,037 messages...
+✅ Extracted 118037 CAN messages
+💾 Writing ASC file...
+============================================================
+✅ Conversion completed successfully!
+📊 Statistics:
+   Total messages: 118037
+   Extended frames (29-bit): 118037
+   Standard frames (11-bit): 0
+   Output file: original_truck_log.asc
+   Duration: 321.326 seconds
+
+📋 Unique Frame IDs Found (Alphabetical Order):
+   0x0CF00400
+   0x0CFE6CEE
+   0x0CFF0217
+   0x0CFF024A
+   0x0CFF0419
+   0x0CFF04EC
+   0x0CFF6327
+   0x0CFF7427
+   0x14F0090B
+   0x18D0FF17
+   0x18EBFF00
+   0x18ECFF00
+   0x18F0010B
+   0x18FDE127
+   0x18FEAE30
+   0x18FEC1EE
+   0x18FECA45
+   0x18FEDF00
+   0x18FEE617
+   0x18FEEE00
+   0x18FEF100
+   0x18FEF200
+   0x18FEF34A
+   0x18FEF527
+   0x18FEFC47
+   0x18FF1519
+   0x18FF1619
+   0x18FF5019
+   0x18FF5119
+   0x18FF5F00
+   0x18FF6019
+   0x18FF60EC
+   0x18FF6A47
+   0x18FF7A00
+   0x18FF7C00
+   0x18FF8227
+   0x18FF9617
+   0x18FF961E
+   0x18FFB11E
+   0x18FFB7EC
+   0x18FFB81E
+   0x18FFBDEC
+   0x18FFC432
+   0x18FFC5EC
+   0x18FFCA32
+   0x18FFD14C
+   0x18FFD517
+   0x18FFFAE6
+   0x19FF094C
+   0x19FF7347
+   0x19FF9219
+
+📊 Unique Frame IDs Statistics:
+   Total unique frame IDs: 51
+
+🔍 Frame Type Analysis:
+
+📋 Sample Extended Frames (IDE=1):
+   1.    0.000s | 0x18F0010Bx | 00 00 FF FF FF 01 0B FF
+   2.    0.000s | 0x18D0FF17x | 91 91 FA FF FF FF FF FF
+   3.    0.001s | 0x18FF9617x | C7 FF FF FF FF FF FF FF
+   4.    0.002s | 0x14F0090Bx | 9F 7B 60 87 7D F7 7E 7B
+   5.    0.003s | 0x18FFBDECx | F5 F0 F0 EC FF FF FF FF
+
+📊 Extended Frame ID Range:
+   Min: 0x0CF00400 | Max: 0x19FF9219

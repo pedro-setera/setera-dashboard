@@ -1,0 +1,137 @@
+### 1. Vehicle Total Mileage (Km)
+
+The standard PGN for total distance (PGN 65248) is not in your list. However, the document specifies a high-resolution version which is present in your log.
+
+*   **Parameter:** High Resolution Total Vehicle Distance
+*   **PGN:** 65217 (0xFEC1)
+*   **SPN:** 917
+*   **Frame ID from your log:** `0x18FEC1EE`
+*   **Data Payload Location:**
+    *   **Bytes:** 1-4 (4 bytes, Little Endian)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 5 m/bit
+    *   **Offset:** 0
+    *   **Formula:** `Total Distance (km) = (Raw_Value * 5) / 1000`
+*   **For your simulator:** To inject a value, you would calculate the desired raw value (`Desired_km * 1000 / 5`), convert it to a 32-bit integer, and place it into bytes 1, 2, 3, and 4 (LSB first) of any frame with ID `0x18FEC1EE`.
+
+---
+
+### 2. Fuel Tank Level (%)
+
+This is a standard parameter found on the Dash Display PGN.
+
+*   **Parameter:** Fuel Level
+*   **PGN:** 65276 (0xFEFC)
+*   **SPN:** 96
+*   **Frame ID from your log:** `0x18FEFC47`
+*   **Data Payload Location:**
+    *   **Byte:** 2 (1 byte)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 0.4 %/bit
+    *   **Offset:** 0
+    *   **Formula:** `Fuel Level (%) = Raw_Value * 0.4`
+*   **For your simulator:** To inject a value of 14.8%, you would calculate the raw value (`14.8 / 0.4 = 37`), and place this value (0x25) into byte 2 of any frame with ID `0x18FEFC47`.
+
+---
+
+### 3. Vehicle Speed (Km/h)
+
+This is a fundamental vehicle parameter, broadcast frequently.
+
+*   **Parameter:** Wheel-Based Vehicle Speed
+*   **PGN:** 65265 (0xFEF1)
+*   **SPN:** 84
+*   **Frame ID from your log:** `0x18FEF100`
+*   **Data Payload Location:**
+    *   **Bytes:** 2-3 (2 bytes, Little Endian)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 1/256 km/h per bit (approx. 0.00390625 km/h per bit)
+    *   **Offset:** 0
+    *   **Formula:** `Speed (km/h) = Raw_Value * (1/256)`
+*   **For your simulator:** To inject a value of 11 km/h, you would calculate the raw value (`11 * 256 = 2816`), convert it to a 16-bit integer (0x0B00), and place it into bytes 2 and 3 (LSB first) of any frame with ID `0x18FEF100`.
+
+---
+
+### 4. Engine RPM
+
+This is one of the most common parameters, found in the primary engine controller message.
+
+*   **Parameter:** Engine Speed
+*   **PGN:** 61444 (0xF004)
+*   **SPN:** 190
+*   **Frame ID from your log:** `0x0CF00400`
+*   **Data Payload Location:**
+    *   **Bytes:** 4-5 (2 bytes, Little Endian)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 0.125 rpm/bit
+    *   **Offset:** 0
+    *   **Formula:** `Engine Speed (RPM) = Raw_Value * 0.125`
+*   **For your simulator:** To inject a value of 1183 RPM, you would calculate the raw value (`1183 / 0.125 = 9464`), convert it to a 16-bit integer (0x24F8), and place it into bytes 4 and 5 (LSB first) of any frame with ID `0x0CF00400`.
+
+---
+
+### 5. Engine Coolant Temperature (°C)
+
+This is a standard engine temperature parameter.
+
+*   **Parameter:** Engine Coolant Temperature
+*   **PGN:** 65262 (0xFEEE)
+*   **SPN:** 110
+*   **Frame ID from your log:** `0x18FEEE00`
+*   **Data Payload Location:**
+    *   **Byte:** 1 (1 byte)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 1 °C/bit
+    *   **Offset:** -40 °C
+    *   **Formula:** `Temperature (°C) = Raw_Value - 40`
+*   **For your simulator:** To inject a value of 25 °C, you would calculate the raw value (`25 + 40 = 65`), and place this value (0x41) into byte 1 of any frame with ID `0x18FEEE00`.
+
+---
+
+### 6. Instant Fuel Consumption (fuel economy)
+
+This value is provided in the standard Fuel Economy PGN. Note that the standard unit is km/L.
+
+*   **Parameter:** Engine Instantaneous Fuel Economy
+*   **PGN:** 65266 (0xFEF2)
+*   **SPN:** 184
+*   **Frame ID from your log:** `0x18FEF200`
+*   **Data Payload Location:**
+    *   **Bytes:** 3-4 (2 bytes, Little Endian)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 1/512 km/L per bit
+    *   **Offset:** 0
+    *   **Formula:** `Fuel Economy (km/L) = Raw_Value * (1/512)`
+*   **For your simulator:** To inject a value of 13.60 km/L, you would calculate the raw value (`13.60 * 512 = 6963`), convert it to a 16-bit integer (0x1B33), and place it into bytes 3 and 4 (LSB first) of any frame with ID `0x18FEF200`.
+
+---
+
+### 7. Engine Torque (%)
+
+This value, expressed as a percentage, corresponds to the actual engine torque relative to a reference torque.
+
+*   **Parameter:** Actual Engine - Percent Torque
+*   **PGN:** 61444 (0xF004)
+*   **SPN:** 513
+*   **Frame ID from your log:** `0x0CF00400`
+*   **Data Payload Location:**
+    *   **Byte:** 3 (1 byte)
+*   **Conversion:**
+    *   **Resolution/Scaling:** 1 %/bit
+    *   **Offset:** -125 %
+    *   **Formula:** `Torque (%) = Raw_Value - 125`
+*   **For your simulator:** To inject a value of 25%, you would calculate the raw value (`25 + 125 = 150`), and place this value (0x96) into byte 3 of any frame with ID `0x0CF00400`.
+
+***
+
+### Summary for Simulator Module:
+
+| Parameter | Frame ID | PGN | SPN | Byte(s) | Formula |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Total Mileage** | `0x18FEC1EE` | 65217 | 917 | 1-4 | `(Raw * 5) / 1000` |
+| **Fuel Level** | `0x18FEFC47` | 65276 | 96 | 2 | `Raw * 0.4` |
+| **Vehicle Speed** | `0x18FEF100` | 65265 | 84 | 2-3 | `Raw * (1/256)` |
+| **Engine RPM** | `0x0CF00400` | 61444 | 190 | 4-5 | `Raw * 0.125` |
+| **Coolant Temp** | `0x18FEEE00` | 65262 | 110 | 1 | `Raw - 40` |
+| **Fuel Economy** | `0x18FEF200` | 65266 | 184 | 3-4 | `Raw * (1/512)` |
+| **Engine Torque** | `0x0CF00400` | 61444 | 513 | 3 | `Raw - 125` |
