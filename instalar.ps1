@@ -159,6 +159,45 @@ function Disable-SmartScreen {
     }
 }
 
+function Create-DesktopShortcut {
+    Write-ColorOutput $CYAN "[INFO] Criando atalho na area de trabalho..."
+
+    try {
+        # Define paths
+        $targetPath = "C:\Program Files\setera-tools\dashboard-electron\dist\win-unpacked\SETERA-Ferramentas.exe"
+        $desktopPath = [System.Environment]::GetFolderPath("Desktop")
+        $shortcutPath = Join-Path $desktopPath "SETERA Ferramentas.lnk"
+
+        # Check if target executable exists
+        if (-NOT (Test-Path $targetPath)) {
+            Write-ColorOutput $YELLOW "[AVISO] Executavel nao encontrado em: $targetPath"
+            Write-ColorOutput $YELLOW "[INFO] Atalho nao sera criado. Verifique se o SETERA Tools esta instalado corretamente."
+            return $false
+        }
+
+        # Create shortcut using WScript.Shell COM object
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($shortcutPath)
+        $shortcut.TargetPath = $targetPath
+        $shortcut.WorkingDirectory = Split-Path $targetPath -Parent
+        $shortcut.Description = "SETERA Ferramentas v1.4 - Dashboard de Ferramentas de Desenvolvimento"
+        $shortcut.Save()
+
+        # Release COM object
+        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($shell) | Out-Null
+
+        Write-ColorOutput $GREEN "[OK] Atalho criado com sucesso na area de trabalho!"
+        Write-ColorOutput $GREEN "[INFO] Nome do atalho: SETERA Ferramentas"
+        return $true
+    }
+    catch {
+        Write-ColorOutput $RED "[ERRO] Erro ao criar atalho: $($_.Exception.Message)"
+        Write-ColorOutput $YELLOW "[INFO] Voce pode criar o atalho manualmente apontando para:"
+        Write-ColorOutput $YELLOW "[INFO] $targetPath"
+        return $false
+    }
+}
+
 function Show-CompletionSummary {
     Write-ColorOutput $GREEN "=========================================="
     Write-ColorOutput $GREEN " INSTALACAO CONCLUIDA COM SUCESSO!"
@@ -213,7 +252,12 @@ function Start-Installation {
     Disable-SmartScreen
     Write-Output ""
 
-    # Step 5: Show completion summary
+    # Step 5: Create desktop shortcut
+    Write-ColorOutput $CYAN "5. Criando atalho na area de trabalho..."
+    Create-DesktopShortcut
+    Write-Output ""
+
+    # Step 6: Show completion summary
     Show-CompletionSummary
 }
 
