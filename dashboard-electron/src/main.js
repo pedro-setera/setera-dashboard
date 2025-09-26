@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const express = require('express');
-const { spawn, exec } = require('child_process');
+const { spawn, exec, execFile } = require('child_process');
 const fs = require('fs');
 
 let mainWindow;
@@ -123,31 +123,15 @@ expressApp.post('/launch-stm32', async (req, res) => {
       });
     }
 
-    // Launch STM32 Cube Programmer
-    const result = spawn(stm32Path, [], {
-      detached: true,
-      stdio: 'ignore'
-    });
-
-    // Set up error handler before sending response
-    let responseSent = false;
-
-    result.on('error', (err) => {
-      console.error('Failed to launch STM32 Cube Programmer:', err);
-      if (!responseSent) {
-        responseSent = true;
-        res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${err.message}` });
-      }
-    });
-
-    // Give a small delay to catch immediate errors
-    setTimeout(() => {
-      if (!responseSent) {
-        responseSent = true;
-        result.unref();
+    // Use exec with quotes to handle spaces in path properly
+    exec(`"${stm32Path}"`, (error, stdout, stderr) => {
+      if (error && error.code !== null) {
+        console.error('Failed to launch STM32 Cube Programmer:', error);
+        res.json({ success: false, error: `Erro ao iniciar STM32 Cube Programmer: ${error.message}` });
+      } else {
         res.json({ success: true, message: 'STM32 Cube Programmer iniciado com sucesso' });
       }
-    }, 100);
+    });
 
   } catch (error) {
     res.json({ success: false, error: error.message });
