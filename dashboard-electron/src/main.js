@@ -205,99 +205,26 @@ expressApp.post('/launch', async (req, res) => {
       const requiresElevation = fileName.includes('update-fw-str1010');
 
       if (requiresElevation) {
-        // Use elevate.exe for admin-required executables
-        // Resolve elevate.exe path correctly for both dev and packaged builds
-        const candidateElevatePaths = [
-          path.join(process.resourcesPath, 'elevate.exe'), // Packaged build
-          path.join(__dirname, '..', '..', 'dist', 'elevate.exe') // Dev fallback
-        ];
-
-        const elevatePath = candidateElevatePaths.find(fs.existsSync);
-        console.log('Elevation paths tested:', candidateElevatePaths);
-        console.log('Selected elevate.exe path:', elevatePath);
-
-        if (elevatePath) {
-          const result = spawn(elevatePath, [fullPath], {
-            cwd: path.dirname(fullPath),
-            detached: true,
-            stdio: 'ignore'
-          });
-
-          let responseSent = false;
-
-          // Add error handler to prevent uncaught exceptions
-          result.on('error', (err) => {
-            console.error('Failed to launch elevated process:', err);
-            if (!responseSent) {
-              responseSent = true;
-              res.json({ success: false, error: `Erro ao iniciar aplicação com privilégios administrativos: ${err.message}` });
-            }
-          });
-
-          // Give a small delay to catch immediate errors
-          setTimeout(() => {
-            if (!responseSent) {
-              responseSent = true;
-              result.unref();
-              res.json({ success: true, message: 'Aplicação com privilégios administrativos iniciada com sucesso' });
-            }
-          }, 100);
-        } else {
-          // Fallback: try regular spawn and let Windows handle UAC
-          console.log('elevate.exe not found, trying direct spawn');
-          const result = spawn(fullPath, [], {
-            cwd: path.dirname(fullPath),
-            detached: true,
-            stdio: 'ignore'
-          });
-
-          let responseSent = false;
-
-          // Add error handler to prevent uncaught exceptions
-          result.on('error', (err) => {
-            console.error('Failed to launch process directly:', err);
-            if (!responseSent) {
-              responseSent = true;
-              res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
-            }
-          });
-
-          // Give a small delay to catch immediate errors
-          setTimeout(() => {
-            if (!responseSent) {
-              responseSent = true;
-              result.unref();
-              res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
-            }
-          }, 100);
-        }
-      } else {
-        // Regular executable files
-        const result = spawn(fullPath, [], {
-          cwd: path.dirname(fullPath),
-          detached: true,
-          stdio: 'ignore'
-        });
-
-        let responseSent = false;
-
-        // Add error handler to prevent uncaught exceptions
-        result.on('error', (err) => {
-          console.error('Failed to launch regular process:', err);
-          if (!responseSent) {
-            responseSent = true;
-            res.json({ success: false, error: `Erro ao iniciar aplicação: ${err.message}` });
+        // For admin-required executables, use exec with quotes to handle paths properly
+        // Windows will show UAC prompt automatically
+        exec(`"${fullPath}"`, { cwd: path.dirname(fullPath) }, (error, stdout, stderr) => {
+          if (error && error.code !== null) {
+            console.error('Failed to launch elevated process:', error);
+            res.json({ success: false, error: `Erro ao iniciar aplicação com privilégios administrativos: ${error.message}` });
+          } else {
+            res.json({ success: true, message: 'Aplicação com privilégios administrativos iniciada com sucesso' });
           }
         });
-
-        // Give a small delay to catch immediate errors
-        setTimeout(() => {
-          if (!responseSent) {
-            responseSent = true;
-            result.unref();
+      } else {
+        // Regular executable files - use exec for better path handling
+        exec(`"${fullPath}"`, { cwd: path.dirname(fullPath) }, (error, stdout, stderr) => {
+          if (error && error.code !== null) {
+            console.error('Failed to launch regular process:', error);
+            res.json({ success: false, error: `Erro ao iniciar aplicação: ${error.message}` });
+          } else {
             res.json({ success: true, message: 'Aplicação executável iniciada com sucesso' });
           }
-        }, 100);
+        });
       }
 
     } else {
