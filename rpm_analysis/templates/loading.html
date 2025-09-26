@@ -125,12 +125,13 @@
 
         // Enhanced progress steps with retry awareness
         const progressSteps = [
-            { progress: 15, message: "Iniciando servidor Flask..." },
-            { progress: 30, message: "Carregando configurações..." },
-            { progress: 45, message: "Conectando ao banco de dados..." },
-            { progress: 60, message: "Estabelecendo conexões..." },
-            { progress: 75, message: "Preparando interface..." },
-            { progress: 90, message: "Finalizando inicialização..." }
+            { progress: 10, message: "Verificando servidor Flask..." },
+            { progress: 25, message: "Servidor Flask ativo..." },
+            { progress: 40, message: "Carregando configurações..." },
+            { progress: 55, message: "Conectando ao PostgreSQL..." },
+            { progress: 70, message: "Estabelecendo conexões..." },
+            { progress: 85, message: "Preparando interface..." },
+            { progress: 95, message: "Finalizando inicialização..." }
         ];
 
         let currentStep = 0;
@@ -154,12 +155,12 @@
         }
 
         function getRetryDelay(attemptNumber) {
-            // Much more conservative delays - minimum 5 seconds between retries
+            // More conservative delays to allow for PostgreSQL connection
             const delays = [
-                3000,   // 1st attempt: wait 3s after initial load
-                7000,   // 2nd attempt: wait 7s (server needs time to initialize)
-                6000,   // 3rd attempt: wait 6s
-                8000,   // 4th attempt: wait 8s
+                2000,   // 1st attempt: wait 2s after initial load
+                4000,   // 2nd attempt: wait 4s (Flask server should be running)
+                6000,   // 3rd attempt: wait 6s (database connection might be establishing)
+                8000,   // 4th attempt: wait 8s (allow more time for DB)
                 10000,  // 5th attempt: wait 10s
                 12000   // 6th+ attempts: wait 12s
             ];
@@ -216,10 +217,24 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per request
 
-            fetch('/check_ready', {
+            // First check if Flask server is alive
+            fetch('/health', {
                 method: 'GET',
                 signal: controller.signal,
                 cache: 'no-cache'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Flask is alive, now check database readiness
+                    if (attempts === 1 && currentStep < 2) updateProgress(); // Flask server confirmed
+                    return fetch('/check_ready', {
+                        method: 'GET',
+                        signal: controller.signal,
+                        cache: 'no-cache'
+                    });
+                } else {
+                    throw new Error('Flask server not responding');
+                }
             })
             .then(response => {
                 clearTimeout(timeoutId);
@@ -273,9 +288,9 @@
         addLog("⏳ Aguardando inicialização completa...");
         updateProgress();
 
-        // Start first check after giving server time to start (3 seconds)
-        addLog("⏰ Primeira verificação em 3 segundos...");
-        setTimeout(checkServer, 3000);
+        // Start first check after giving server time to start (2 seconds)
+        addLog("⏰ Primeira verificação em 2 segundos...");
+        setTimeout(checkServer, 2000);
 
         // Update progress more conservatively
         const progressInterval = setInterval(() => {

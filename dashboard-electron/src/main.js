@@ -246,10 +246,11 @@ expressApp.post('/launch', async (req, res) => {
 
         flaskProcess.unref();
 
-        // Wait and open browser
+        // Wait longer for Flask server initialization and database connection
+        // The RPM analysis app needs time to connect to PostgreSQL database
         setTimeout(() => {
           shell.openExternal('http://localhost:5004/loading');
-        }, 3000);
+        }, 5000);
 
         res.json({ success: true, message: 'Aplicação Flask iniciada com sucesso' });
       } else {

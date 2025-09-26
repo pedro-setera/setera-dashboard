@@ -51,7 +51,7 @@ def connect_to_database(db_params, max_retries=3, retry_delay=2):
 
             # Add connection timeout for faster failure detection
             db_params_with_timeout = dict(db_params)
-            db_params_with_timeout['connect_timeout'] = 8
+            db_params_with_timeout['connect_timeout'] = 10
 
             conn = psycopg2.connect(**db_params_with_timeout)
 
@@ -284,6 +284,11 @@ def loading():
     """Serve the loading page"""
     logging.info("Serving loading page")
     return render_template('loading.html')
+
+@app.route('/health')
+def health():
+    """Simple health check endpoint that doesn't require database"""
+    return jsonify({'status': 'alive', 'message': 'Flask server is running'})
 
 @app.route('/check_ready')
 def check_ready():
