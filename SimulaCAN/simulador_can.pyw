@@ -198,171 +198,231 @@ class PlaybackWorker(QThread):
         
         # Disable immediate injection for maximum performance
         self._immediate_injection_enabled = False
-        
+
         # Dynamic FPS adaptation system
         self._fps_measurement_window = deque(maxlen=100)  # Last 100 frames for FPS calculation
         self._last_fps_calculation = 0.0
         self._analysis_mode_active = False  # Track analysis mode for special handling
+
+        # ✅ HIGH-LEVEL RETRY MECHANISM for bus-off recovery
+        self.max_connection_retries = 5  # Total attempts (1 initial + 4 retries)
+        self.current_retry_attempt = 0   # Track current attempt number
         
     def run(self):
         """Loop principal de reprodução - executa em thread separada."""
-        try:
-            if self.test_mode:
-                # ✅ TEST MODE: Skip CAN interface connection completely
-                self.status_update.emit("Modo TESTE ativado - Reprodução offline sem interface CAN...")
-                mode_text = "10ms" if self.continuous_mode else "com tempo original"
-                self.status_update.emit(f"Iniciando reprodução TESTE {mode_text} de '{self.log_filename}'...")
-                self.bus = None  # No CAN interface in test mode
-            else:
-                # ✅ NORMAL PLAYBACK MODE: Active transmission enabled (no listen-only)
-                self.status_update.emit("Conectando à interface CANBUS...")
-                
-                self.bus = can.interface.Bus(
-                    channel=0,  # Always Channel 1 (ch0) for safety
-                    interface='canalystii',
-                    bitrate=self.bitrate,
-                    # Configurações otimizadas para receptores lentos
-                    receive_timeout=0.1,
-                    # Configurações específicas do CANalyst-II para melhor flow control
-                    can_filters=None,  # Aceitar todos os frames
-                    # NOTE: No listen_only=True for playback - we need to transmit frames
-                    # ✅ EXTENDED FRAME SUPPORT FOR J1939
-                    extended_id=True
-                )
-                
-                mode_text = "10ms" if self.continuous_mode else "com tempo original"
-                self.status_update.emit(f"Conectado! Iniciando reprodução {mode_text} de '{self.log_filename}'...")
-            
-            self.is_playing = True
-            
-            # Contar total de mensagens para rastreamento de progresso
-            total_messages = self._count_messages()
-            current_message = 0
-            
-            # Contadores para estatísticas de erro
-            total_usb_errors = 0
-            total_retries = 0
-            
-            # Counter to reset error stats periodically (prevent accumulation effects)
-            loop_iteration = 0
-            
-            # Loop de reprodução (sem limite artificial)
-            while self.is_playing:
-                try:
-                    # Abrir arquivo de log para leitura
-                    log_reader = can.LogReader(self.log_filename)
-                    self.status_update.emit("--- Iniciando novo loop ---")
-                    
-                    # PONTO CHAVE: Inicialização da temporização de alta precisão
-                    playback_start_time = None
-                    log_start_time = None
-                    
-                    current_message = 0
-                    messages_sent_in_batch = 0
-                    
-                    # Reset performance counters every loop
-                    if hasattr(self, 'transmission_times'):
-                        self.transmission_times.clear()
-                    
-                    # Reset error counters periodically
-                    loop_iteration += 1
-                    if loop_iteration % 10 == 0:
-                        total_usb_errors = 0
-                        self.usb_error_count = 0
-                    
-                    # Processar cada mensagem no log
-                    for msg in log_reader:
-                        if not self.is_playing:
-                            self.status_update.emit("Parando reprodução (início do loop)...")
-                            break
-                        
-                        # Inicializa a temporização no primeiro frame
-                        if playback_start_time is None:
-                            playback_start_time = time.perf_counter()
-                            log_start_time = msg.timestamp
-                        
-                        # --- TEMPORIZAÇÃO DE ALTA PRECISÃO ---
-                        if self.continuous_mode:
-                            # Modo contínuo: delay fixo
-                            self.precise_sleep(self.continuous_interval)
+        # ✅ HIGH-LEVEL RETRY LOOP for handling bus-off timeout errors
+        while self.current_retry_attempt < self.max_connection_retries:
+            self.current_retry_attempt += 1
+
+            # ✅ Status message for retry attempts
+            if self.current_retry_attempt > 1:
+                self.status_update.emit(f"Tentativa de reconexão {self.current_retry_attempt}/{self.max_connection_retries}...")
+
+            try:
+                if self.test_mode:
+                    # ✅ TEST MODE: Skip CAN interface connection completely
+                    self.status_update.emit("Modo TESTE ativado - Reprodução offline sem interface CAN...")
+                    mode_text = "10ms" if self.continuous_mode else "com tempo original"
+                    self.status_update.emit(f"Iniciando reprodução TESTE {mode_text} de '{self.log_filename}'...")
+                    self.bus = None  # No CAN interface in test mode
+                else:
+                    # ✅ NORMAL PLAYBACK MODE: Active transmission enabled (no listen-only)
+                    self.status_update.emit("Conectando à interface CANBUS...")
+
+                    self.bus = can.interface.Bus(
+                        channel=0,  # Always Channel 1 (ch0) for safety
+                        interface='canalystii',
+                        bitrate=self.bitrate,
+                        # Configurações otimizadas para receptores lentos
+                        receive_timeout=0.1,
+                        # Configurações específicas do CANalyst-II para melhor flow control
+                        can_filters=None,  # Aceitar todos os frames
+                        # NOTE: No listen_only=True for playback - we need to transmit frames
+                        # ✅ EXTENDED FRAME SUPPORT FOR J1939
+                        extended_id=True
+                    )
+
+                    mode_text = "10ms" if self.continuous_mode else "com tempo original"
+                    self.status_update.emit(f"Conectado! Iniciando reprodução {mode_text} de '{self.log_filename}'...")
+
+                self.is_playing = True
+
+                # Contar total de mensagens para rastreamento de progresso
+                total_messages = self._count_messages()
+                current_message = 0
+
+                # Contadores para estatísticas de erro
+                total_usb_errors = 0
+                total_retries = 0
+
+                # Counter to reset error stats periodically (prevent accumulation effects)
+                loop_iteration = 0
+
+                # Loop de reprodução (sem limite artificial)
+                while self.is_playing:
+                    try:
+                        # Abrir arquivo de log para leitura
+                        log_reader = can.LogReader(self.log_filename)
+                        self.status_update.emit("--- Iniciando novo loop ---")
+
+                        # PONTO CHAVE: Inicialização da temporização de alta precisão
+                        playback_start_time = None
+                        log_start_time = None
+
+                        current_message = 0
+                        messages_sent_in_batch = 0
+
+                        # Reset performance counters every loop
+                        if hasattr(self, 'transmission_times'):
+                            self.transmission_times.clear()
+
+                        # Reset error counters periodically
+                        loop_iteration += 1
+                        if loop_iteration % 10 == 0:
+                            total_usb_errors = 0
+                            self.usb_error_count = 0
+
+                        # Processar cada mensagem no log
+                        for msg in log_reader:
+                            if not self.is_playing:
+                                self.status_update.emit("Parando reprodução (início do loop)...")
+                                break
+
+                            # Inicializa a temporização no primeiro frame
+                            if playback_start_time is None:
+                                playback_start_time = time.perf_counter()
+                                log_start_time = msg.timestamp
+
+                            # --- TEMPORIZAÇÃO DE ALTA PRECISÃO ---
+                            if self.continuous_mode:
+                                # Modo contínuo: delay fixo
+                                self.precise_sleep(self.continuous_interval)
+                            else:
+                                # Modo original: Sincronizar com o tempo do log
+                                elapsed_log_time = msg.timestamp - log_start_time
+                                target_send_time = playback_start_time + elapsed_log_time
+
+                                # Calcular o tempo de espera necessário para compensar o overhead do loop
+                                wait_time = target_send_time - time.perf_counter()
+
+                                if wait_time > 0:
+                                    self.precise_sleep(wait_time)
+
+                            # Verificar novamente se deve parar APÓS o delay
+                            if not self.is_playing:
+                                self.status_update.emit("Parando reprodução (após delay)...")
+                                break
+
+                            # ✅ APLICAR SIMULAÇÃO EM TEMPO REAL
+                            if self.frame_modifier:
+                                msg = self.frame_modifier.modify_frame(msg)
+
+                            # Enviar mensagem com retry (SEM afetar timing)
+                            success = self._send_message_with_retry(msg)
+
+                            if success:
+                                # Emitir sinal de transmissão real para FPS correto
+                                self.actual_transmission.emit()
+
+                                messages_sent_in_batch += 1
+
+                                # Medição de FPS dinâmica (com amostragem para performance)
+                                if messages_sent_in_batch % 20 == 0:
+                                    current_time = time.perf_counter()
+                                    self._fps_measurement_window.append(current_time)
+
+                                # A amostragem foi removida. Emitir sinal para CADA frame.
+                                msg_str = f"{msg.timestamp:.6f} | {msg.arbitration_id:08X} | {' '.join(f'{b:02X}' for b in msg.data)}"
+                                self.message_sent.emit(msg_str)
+
+                                current_message += 1
+
+                                # Progress updates - fixed interval
+                                if total_messages > 0 and current_message % 100 == 0:
+                                    progress = int((current_message / total_messages) * 100)
+                                    self.progress_update.emit(progress)
+                            else:
+                                # Silent failure for maximum performance - no status updates
+                                total_usb_errors += 1
+                                self.usb_error_count += 1
+
+                            # Verificar se deve parar a cada 50 mensagens para responsividade (menos frequente)
+                            if current_message % 50 == 0 and not self.is_playing:
+                                self.status_update.emit("Parando reprodução...")
+                                break
+
+                    except FileNotFoundError:
+                        self.error_occurred.emit(f"Arquivo de log '{self.log_filename}' não encontrado!")
+                        break
+                    except Exception as e:
+                        # ✅ CHECK IF TIMEOUT ERROR: Let it bubble up to retry logic
+                        error_str = str(e).lower()
+                        is_timeout_error = ('timeout' in error_str or 'errno 10060' in error_str or
+                                           'usb' in error_str or '_usb_reap_async' in error_str)
+
+                        # ✅ DEBUG: Log which path the exception takes
+                        self.status_update.emit(f"DEBUG: Inner exception caught: {str(e)}")
+                        self.status_update.emit(f"DEBUG: Is timeout error: {is_timeout_error}")
+
+                        if is_timeout_error:
+                            # Re-raise timeout errors so they reach the outer retry handler
+                            self.status_update.emit("DEBUG: Re-raising timeout error to retry logic")
+                            raise e
                         else:
-                            # Modo original: Sincronizar com o tempo do log
-                            elapsed_log_time = msg.timestamp - log_start_time
-                            target_send_time = playback_start_time + elapsed_log_time
-                            
-                            # Calcular o tempo de espera necessário para compensar o overhead do loop
-                            wait_time = target_send_time - time.perf_counter()
-                            
-                            if wait_time > 0:
-                                self.precise_sleep(wait_time)
-                        
-                        # Verificar novamente se deve parar APÓS o delay
-                        if not self.is_playing:
-                            self.status_update.emit("Parando reprodução (após delay)...")
+                            # Non-timeout errors should be handled immediately as before
+                            self.status_update.emit("DEBUG: Handling non-timeout error immediately")
+                            self.error_occurred.emit(f"Erro na reprodução: {str(e)}")
                             break
-                        
-                        # ✅ APLICAR SIMULAÇÃO EM TEMPO REAL
-                        if self.frame_modifier:
-                            msg = self.frame_modifier.modify_frame(msg)
-                        
-                        # Enviar mensagem com retry (SEM afetar timing)
-                        success = self._send_message_with_retry(msg)
-                        
-                        if success:
-                            # Emitir sinal de transmissão real para FPS correto
-                            self.actual_transmission.emit()
-                            
-                            messages_sent_in_batch += 1
-                            
-                            # Medição de FPS dinâmica (com amostragem para performance)
-                            if messages_sent_in_batch % 20 == 0:
-                                current_time = time.perf_counter()
-                                self._fps_measurement_window.append(current_time)
-                            
-                            # A amostragem foi removida. Emitir sinal para CADA frame.
-                            msg_str = f"{msg.timestamp:.6f} | {msg.arbitration_id:08X} | {' '.join(f'{b:02X}' for b in msg.data)}"
-                            self.message_sent.emit(msg_str)
-                            
-                            current_message += 1
-                            
-                            # Progress updates - fixed interval
-                            if total_messages > 0 and current_message % 100 == 0:
-                                progress = int((current_message / total_messages) * 100)
-                                self.progress_update.emit(progress)
-                        else:
-                            # Silent failure for maximum performance - no status updates
-                            total_usb_errors += 1
-                            self.usb_error_count += 1
-                        
-                        # Verificar se deve parar a cada 50 mensagens para responsividade (menos frequente)
-                        if current_message % 50 == 0 and not self.is_playing:
-                            self.status_update.emit("Parando reprodução...")
-                            break
-                            
-                except FileNotFoundError:
-                    self.error_occurred.emit(f"Arquivo de log '{self.log_filename}' não encontrado!")
+
+                    # Verificar se deve parar entre loops
+                    if not self.is_playing:
+                        break
+
+                    # Remove inter-loop delay to prevent throughput degradation
+                    # if self.is_playing:
+                    #     time.sleep(0.01)  # This might be causing the 45-second FPS drop
+
+                # Reportar estatísticas finais
+                if total_usb_errors > 0:
+                    self.status_update.emit(f"Reprodução concluída. Mensagens perdidas: {total_usb_errors} (temporização preservada)")
+
+                # ✅ If we reach here, playback completed successfully - break out of retry loop
+                break
+
+            except Exception as e:
+                # ✅ HIGH-LEVEL RETRY LOGIC: Check if this is a timeout error and we have retries left
+                error_str = str(e).lower()
+                is_timeout_error = ('timeout' in error_str or 'errno 10060' in error_str or
+                                   'usb' in error_str or '_usb_reap_async' in error_str)
+
+                # ✅ DEBUG: Log outer exception handler
+                self.status_update.emit(f"DEBUG: Outer exception caught: {str(e)}")
+                self.status_update.emit(f"DEBUG: Retry attempt {self.current_retry_attempt}/{self.max_connection_retries}")
+                self.status_update.emit(f"DEBUG: Is timeout error: {is_timeout_error}")
+
+                if is_timeout_error and self.current_retry_attempt < self.max_connection_retries:
+                    # This is a timeout error and we have retries left
+                    self.status_update.emit(f"Erro de timeout detectado. Tentativa {self.current_retry_attempt}/{self.max_connection_retries}. Reconectando...")
+
+                    # Clean up current resources before retry
+                    self.cleanup()
+
+                    # Wait a brief moment before retry
+                    time.sleep(1.0)
+
+                    # Continue to next retry attempt
+                    continue
+                else:
+                    # Either not a timeout error, or we've exhausted retries
+                    if is_timeout_error:
+                        self.error_occurred.emit(f"Erro na reprodução após {self.max_connection_retries} tentativas: {str(e)}")
+                    else:
+                        self.error_occurred.emit(f"Erro de conexão: {str(e)}")
                     break
-                except Exception as e:
-                    self.error_occurred.emit(f"Erro na reprodução: {str(e)}")
-                    break
-                    
-                # Verificar se deve parar entre loops
-                if not self.is_playing:
-                    break
-                    
-                # Remove inter-loop delay to prevent throughput degradation
-                # if self.is_playing:
-                #     time.sleep(0.01)  # This might be causing the 45-second FPS drop
-                    
-            # Reportar estatísticas finais
-            if total_usb_errors > 0:
-                self.status_update.emit(f"Reprodução concluída. Mensagens perdidas: {total_usb_errors} (temporização preservada)")
-                    
-        except Exception as e:
-            self.error_occurred.emit(f"Erro de conexão: {str(e)}")
-        finally:
-            self.cleanup()
-            self.playback_stopped.emit()
+
+        # ✅ Final cleanup and signal emission (moved outside retry loop)
+        self.cleanup()
+        self.playback_stopped.emit()
     
     def _send_message_with_retry(self, msg: can.Message) -> bool:
         """
@@ -386,7 +446,7 @@ class PlaybackWorker(QThread):
                 error_str = str(e).lower()
                 
                 # Verificar se é um erro de timeout USB/CAN
-                if 'timeout' in error_str or 'usb' in error_str or '_usb_reap_async' in error_str:
+                if 'timeout' in error_str or 'errno 10060' in error_str or 'usb' in error_str or '_usb_reap_async' in error_str:
                     if attempt < self.max_usb_retries - 1:  # Não é a última tentativa
                         # Aguardar antes de tentar novamente (SÓ entre retries, não afeta timing)
                         time.sleep(self.usb_retry_delay)
@@ -521,6 +581,8 @@ class PlaybackWorker(QThread):
         """Parar o processo de reprodução."""
         self.status_update.emit("Solicitação de parada recebida...")
         self.is_playing = False
+        # ✅ Reset retry counter for next playback session
+        self.current_retry_attempt = 0
         # Dar tempo para a thread processar a parada
         self.msleep(100)  # 100ms para garantir que a thread veja a mudança
         
@@ -804,7 +866,7 @@ class CANBusMainWindow(QMainWindow):
         # Dropdown de baudrate
         self.baudrate_combo = QComboBox()
         self.baudrate_combo.addItems(["125 kbps", "250 kbps", "500 kbps", "1000 kbps"])
-        self.baudrate_combo.setCurrentText("250 kbps")  # Padrão
+        self.baudrate_combo.setCurrentText("500 kbps")  # Padrão
         self.baudrate_combo.setToolTip("Selecione a velocidade do barramento CAN")
         self.baudrate_combo.setStyleSheet("""
             QComboBox {
