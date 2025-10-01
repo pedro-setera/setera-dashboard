@@ -7,6 +7,7 @@ import time
 from datetime import datetime, timezone
 from tkintermapview import TkinterMapView
 import math
+import queue
 
 class NMEAGenerator:
     def __init__(self, root):
@@ -22,6 +23,16 @@ class NMEAGenerator:
         self.longitude = self.default_longitude
         self.marker = None
 
+        # Thread-safe communication
+        self.gui_queue = queue.Queue()
+        self.thread_lock = threading.Lock()
+
+        # Cached values for thread-safe access
+        self.cached_hdop = 0.7
+        self.cached_vel = 40
+        self.cached_invalid_gps = False
+        self.cached_invalid_crc = False
+
         # Create main frames
         self.setup_upper_frame()
         self.setup_middle_frame()
@@ -33,6 +44,9 @@ class NMEAGenerator:
         # Draw static circle and rectangle
         self.draw_static_circle()
         self.draw_static_rectangle()
+
+        # Start GUI queue processing
+        self.process_gui_queue()
 
     def setup_upper_frame(self):
         self.upper_frame = tk.Frame(self.root)
@@ -55,11 +69,11 @@ class NMEAGenerator:
         tk.Button(self.upper_frame, text="RESET", bg='grey', fg='black', font=("Arial", 10, "bold"), command=self.reset_values).pack(side='left', padx=20)
 
         self.invalid_gps_var = tk.BooleanVar(value=False)
-        self.invalid_gps_checkbox = tk.Checkbutton(self.upper_frame, text="GPS Inválido", variable=self.invalid_gps_var)
+        self.invalid_gps_checkbox = tk.Checkbutton(self.upper_frame, text="GPS Inválido", variable=self.invalid_gps_var, command=self.update_invalid_gps)
         self.invalid_gps_checkbox.pack(side='left', padx=(5, 0))
 
         self.invalid_crc_var = tk.BooleanVar(value=False)
-        self.invalid_crc_checkbox = tk.Checkbutton(self.upper_frame, text="CRC Errado", variable=self.invalid_crc_var)
+        self.invalid_crc_checkbox = tk.Checkbutton(self.upper_frame, text="CRC Errado", variable=self.invalid_crc_var, command=self.update_invalid_crc)
         self.invalid_crc_checkbox.pack(side='left', padx=(5, 0))
 
     def setup_middle_frame(self):
@@ -139,70 +153,110 @@ class NMEAGenerator:
         try:
             self.serial_port = serial.Serial(self.com_port_combo.get(), self.baudrate_combo.get(), timeout=1)
             connected_message = f"Connected to {self.com_port_combo.get()}.\n"
-            self.debug_text.insert(tk.END, connected_message)
-            self.debug_text.see(tk.END)
+            self.gui_queue.put(("debug", connected_message))
             self.running = True
-            self.serial_thread = threading.Thread(target=self.send_nmea_sentences)
+            self.serial_thread = threading.Thread(target=self.send_nmea_sentences, daemon=True)
             self.serial_thread.start()
             self.connect_button.config(text="DESCONECTAR", bg='yellow')
         except serial.SerialException as e:
-            tk.messagebox.showerror("Connection Error", f"Failed to open serial port: {e}")
+            self.gui_queue.put(("error", f"Failed to open serial port: {e}"))
 
     def disconnect(self):
         if self.running:
             self.running = False
-            if self.serial_thread.is_alive():
-                self.serial_thread.join(timeout=1)  # Ensure the thread is stopped with a timeout
-            if self.serial_port.is_open:
+            if hasattr(self, 'serial_thread') and self.serial_thread.is_alive():
+                self.serial_thread.join(timeout=2)  # Ensure the thread is stopped with a timeout
+            if hasattr(self, 'serial_port') and self.serial_port.is_open:
                 self.serial_port.close()
             disconnected_message = "Disconnected.\n"
-            self.debug_text.insert(tk.END, disconnected_message)
-            self.debug_text.see(tk.END)
+            self.gui_queue.put(("debug", disconnected_message))
             self.connect_button.config(text="CONECTAR", bg='green')
 
     def send_nmea_sentences(self):
+        sentence_count = 0
         while self.running:
             try:
                 current_time = datetime.now(timezone.utc)
                 timestamp = current_time.strftime("%H%M%S.%f")[:-3]
                 date_stamp = current_time.strftime("%d%m%y")
-                
+
                 # Create and send GNGGA sentence
                 nmea_gngga = self.create_gngga_sentence(timestamp)
                 self.serial_port.write(f"{nmea_gngga}\r\n".encode())
-                self.debug_text.insert(tk.END, f"{nmea_gngga}\n")
-                self.debug_text.see(tk.END)
+                self.gui_queue.put(("debug", f"{nmea_gngga}\n"))
 
-                # Introduce a 100ms delay
+                # Introduce a 200ms delay
                 time.sleep(0.2)
 
                 # Create and send GNRMC sentence
                 nmea_gnrmc = self.create_gnrmc_sentence(timestamp, date_stamp)
                 self.serial_port.write(f"{nmea_gnrmc}\r\n".encode())
-                self.debug_text.insert(tk.END, f"{nmea_gnrmc}\n")
-                self.debug_text.see(tk.END)
+                self.gui_queue.put(("debug", f"{nmea_gnrmc}\n"))
+
+                # Manage text widget memory - prevent unbounded growth
+                sentence_count += 1
+                if sentence_count % 50 == 0:  # Every 50 sentence pairs (100 lines)
+                    self.gui_queue.put(("manage_text_size", None))
 
                 # Sleep for remaining time to maintain 1-second interval
-                time.sleep(0.9)
+                time.sleep(0.8)
             except serial.SerialException as e:
                 self.running = False
-                tk.messagebox.showerror("Communication Error", f"Error communicating with serial port: {e}")
+                self.gui_queue.put(("error", f"Error communicating with serial port: {e}"))
                 break
 
+    def manage_debug_text_size(self):
+        """Keep debug text widget size under control to prevent memory issues"""
+        try:
+            lines = int(self.debug_text.index('end-1c').split('.')[0])
+            if lines > 1000:  # If more than 1000 lines
+                # Remove the first 200 lines to keep it manageable
+                self.debug_text.delete('1.0', '200.0')
+        except Exception:
+            pass  # Ignore errors in text management
+
+    def process_gui_queue(self):
+        """Process GUI updates from the queue (called from main thread)"""
+        try:
+            while True:
+                try:
+                    msg_type, content = self.gui_queue.get_nowait()
+
+                    if msg_type == "debug":
+                        self.debug_text.insert(tk.END, content)
+                        self.debug_text.see(tk.END)
+                    elif msg_type == "manage_text_size":
+                        self.manage_debug_text_size()
+                    elif msg_type == "error":
+                        tk.messagebox.showerror("Communication Error", content)
+
+                except queue.Empty:
+                    break
+                except Exception:
+                    break
+
+        except Exception:
+            pass
+
+        # Schedule next queue processing
+        self.root.after(50, self.process_gui_queue)
+
     def create_gngga_sentence(self, timestamp):
-        hdop = self.hdop_slider.get()
-        lat, ns = self.convert_latitude(self.latitude)
-        lon, ew = self.convert_longitude(self.longitude)
+        with self.thread_lock:
+            hdop = self.cached_hdop
+            lat, ns = self.convert_latitude(self.latitude)
+            lon, ew = self.convert_longitude(self.longitude)
         sentence = f"GNGGA,{timestamp},{lat},{ns},{lon},{ew},1,12,{hdop:.1f},193.0,M,56.0,M,,"
         checksum = self.calculate_checksum(sentence)
         return f"{sentence}*{checksum}"
 
     def create_gnrmc_sentence(self, timestamp, date_stamp):
-        speed_kmh = self.vel_slider.get()
+        with self.thread_lock:
+            speed_kmh = self.cached_vel
+            lat, ns = self.convert_latitude(self.latitude)
+            lon, ew = self.convert_longitude(self.longitude)
+            status = 'V' if self.cached_invalid_gps else 'A'  # A or V
         speed_knots = round(speed_kmh / 1.852)  # Convert km/h to knots
-        lat, ns = self.convert_latitude(self.latitude)
-        lon, ew = self.convert_longitude(self.longitude)
-        status = 'V' if self.invalid_gps_var.get() else 'A'  # A or V
         sentence = f"GNRMC,{timestamp},{status},{lat},{ns},{lon},{ew},{speed_knots},23,{date_stamp},,,A,V"
         checksum = self.calculate_checksum(sentence)
         return f"{sentence}*{checksum}"
@@ -211,15 +265,28 @@ class NMEAGenerator:
         checksum = 0
         for char in sentence:
             checksum ^= ord(char)
-        if self.invalid_crc_var.get():
-            checksum += 1  # Intentionally make the checksum incorrect
+        with self.thread_lock:
+            if self.cached_invalid_crc:
+                checksum += 1  # Intentionally make the checksum incorrect
         return f"{checksum:02X}"
 
     def update_vel(self, value):
         self.vel_value_label.config(text=value)
+        with self.thread_lock:
+            self.cached_vel = int(value)
 
     def update_hdop(self, value):
         self.hdop_value_label.config(text=f"{float(value):.1f}")
+        with self.thread_lock:
+            self.cached_hdop = float(value)
+
+    def update_invalid_gps(self):
+        with self.thread_lock:
+            self.cached_invalid_gps = self.invalid_gps_var.get()
+
+    def update_invalid_crc(self):
+        with self.thread_lock:
+            self.cached_invalid_crc = self.invalid_crc_var.get()
 
     def clear_log(self):
         self.debug_text.delete('1.0', tk.END)
@@ -231,6 +298,11 @@ class NMEAGenerator:
         self.hdop_value_label.config(text="0.7")
         self.invalid_gps_var.set(False)  # Reset to default unchecked state
         self.invalid_crc_var.set(False)  # Reset to default unchecked state
+        with self.thread_lock:
+            self.cached_vel = 40
+            self.cached_hdop = 0.7
+            self.cached_invalid_gps = False
+            self.cached_invalid_crc = False
         self.reset_map()  # Reset the map
         self.reset_nmea_position()  # Reset the NMEA position
 
@@ -240,13 +312,15 @@ class NMEAGenerator:
         self.place_marker(self.default_latitude, self.default_longitude)
 
     def reset_nmea_position(self):
-        self.latitude = self.default_latitude
-        self.longitude = self.default_longitude
+        with self.thread_lock:
+            self.latitude = self.default_latitude
+            self.longitude = self.default_longitude
 
     def on_map_click(self, coordinates):
         lat, lon = coordinates
-        self.latitude, self.longitude = lat, lon
-        self.place_marker(self.latitude, self.longitude)
+        with self.thread_lock:
+            self.latitude, self.longitude = lat, lon
+        self.place_marker(lat, lon)
 
     def place_marker(self, lat, lon):
         if self.marker:
@@ -314,4 +388,12 @@ class NMEAGenerator:
 if __name__ == "__main__":
     root = tk.Tk()
     app = NMEAGenerator(root)
+
+    # Proper cleanup on window close
+    def on_closing():
+        if hasattr(app, 'running') and app.running:
+            app.disconnect()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
