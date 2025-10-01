@@ -205,10 +205,13 @@ class SerialCollectorQuadrant(tk.Frame):
         self.filter_entry.grid(row=1, column=1, columnspan=6, padx=5, sticky="ew")
 
         ttk.Label(self, text="Envio:").grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="w")
-        
-        # Change send_text_entry to a Combobox
+
+        # Change send_text_entry to a Combobox with autocomplete
         self.send_text_combobox = ttk.Combobox(self, textvariable=self.send_text_var, values=self.commands)
         self.send_text_combobox.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="ew")
+
+        # Bind events for autocomplete and capitalization
+        self.send_text_combobox.bind('<KeyRelease>', self.on_combobox_key_release)
 
         self.send_button = ttk.Button(self, text="ENVIAR", command=self.start_send_data_thread)
         self.send_button.grid(row=2, column=4, padx=5, pady=5)
@@ -239,7 +242,7 @@ class SerialCollectorQuadrant(tk.Frame):
         commands = []
         script_dir = os.path.dirname(os.path.realpath(__file__))
         commands_file = os.path.join(script_dir, 'commands.ini')
-        
+
         if os.path.exists(commands_file):
             try:
                 with open(commands_file, 'r', encoding='utf-8') as file:
@@ -256,6 +259,33 @@ class SerialCollectorQuadrant(tk.Frame):
             except Exception as e:
                 logger.error(f"Error loading commands: {e}")
         return commands
+
+    def on_combobox_key_release(self, event):
+        """Handle autocomplete filtering and automatic capitalization"""
+        # Get current text
+        current_text = self.send_text_var.get()
+
+        # Automatic capitalization - convert to uppercase
+        cursor_position = self.send_text_combobox.index(tk.INSERT)
+        capitalized_text = current_text.upper()
+
+        if capitalized_text != current_text:
+            self.send_text_var.set(capitalized_text)
+            self.send_text_combobox.icursor(cursor_position)
+
+        # Filter dropdown based on typed text (only if text is not empty)
+        if current_text:
+            # Filter commands that contain the typed text (case-insensitive search)
+            filtered = [cmd for cmd in self.commands if current_text.upper() in cmd.upper() and not cmd.startswith('---')]
+
+            if filtered:
+                self.send_text_combobox['values'] = filtered
+            else:
+                # If no matches, show all commands (user is typing a custom command)
+                self.send_text_combobox['values'] = self.commands
+        else:
+            # If text is empty, show all commands
+            self.send_text_combobox['values'] = self.commands
     
     def toggle_connection(self):
         """Toggle serial connection with enhanced error handling"""
