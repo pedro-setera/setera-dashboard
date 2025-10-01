@@ -6,12 +6,12 @@ A modern desktop dashboard for managing and launching SETERA's suite of developm
 
 ## 🚀 Overview
 
-The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 25+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
+The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 26+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
 
 ## 📋 Features
 
 - **Instant Startup**: Desktop application launches in under 1 second
-- **25+ Integrated Tools**: Easy access to all SETERA development utilities
+- **26+ Integrated Tools**: Easy access to all SETERA development utilities
 - **Modern Interface**: Clean, responsive design with search functionality
 - **Portable Distribution**: Single executable with no installation required
 - **Administrative Privileges**: Automatic UAC elevation for tools requiring admin rights

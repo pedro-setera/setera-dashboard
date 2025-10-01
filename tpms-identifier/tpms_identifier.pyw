@@ -4,6 +4,7 @@ import serial
 import serial.tools.list_ports
 import threading
 import os
+from datetime import datetime
 
 # Determine application path for portable Python environment
 application_path = os.path.dirname(os.path.abspath(__file__))
@@ -237,8 +238,7 @@ class TPMSIdentifier:
     def parse_tpms_data(self, hex_string):
         """Parse TPMS data from hex string"""
         try:
-            # Auto-clear log and parsed data when new string arrives
-            self.log_text.delete('1.0', tk.END)
+            # Auto-clear only parsed data when new string arrives (keep log history)
             for label in self.parsed_labels.values():
                 label.config(text='-', fg='blue')
             self.copy_id_button.config(state='disabled')
@@ -265,8 +265,8 @@ class TPMSIdentifier:
             id1 = parts[2] if len(parts) > 2 else ''
             id2 = parts[3] if len(parts) > 3 else ''
             id3 = parts[4] if len(parts) > 4 else ''
-            temp_hex = parts[5] if len(parts) > 5 else ''
-            pressure_hex = parts[6] if len(parts) > 6 else ''
+            pressure_hex = parts[5] if len(parts) > 5 else ''  # SWAPPED: Pressure comes first
+            temp_hex = parts[6] if len(parts) > 6 else ''       # SWAPPED: Temperature comes after
             battery_hex = parts[7] if len(parts) > 7 else ''
             checksum_hex = parts[8] if len(parts) > 8 else ''
 
@@ -364,8 +364,9 @@ class TPMSIdentifier:
             self.update_parsed_field('battery', battery, 'green' if battery == 'OK' else 'red')
             self.update_parsed_field('checksum', checksum_status, checksum_color)
 
-            # Log parsed summary with original data
-            self.log_message(f"RX: {hex_string}\n")
+            # Log parsed summary with original data and timestamp
+            timestamp = datetime.now().strftime('%H:%M:%S.%f')[:-3]  # HH:MM:SS.mmm
+            self.log_message(f"[{timestamp}] RX: {hex_string}\n")
             self.log_message(f"  └─> ID: {sensor_id}, Status: {status}, P: {pressure}, T: {temperature}\n")
 
         except Exception as e:
