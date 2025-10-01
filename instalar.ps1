@@ -2,7 +2,7 @@
 # This script automatically installs and configures all requirements for SETERA Tools
 # Version: 1.0
 # Author: SETERA Development Team
-# Date: 26Set2025
+# Date: 01Out2025
 # Requires: Administrator privileges for SmartScreen configuration
 
 # Script configuration
@@ -23,7 +23,13 @@ $PIP_PACKAGES = @(
     "numpy",
     "scipy",
     "asammdf",
-    "standard-telnetlib"
+    "standard-telnetlib",
+    "pynmea2",
+    "pyserial",
+    "pyperclip",
+    "requests",
+    "tkcalendar",
+    "tkintermapview"
 )
 
 # Colors for output
@@ -181,7 +187,7 @@ function Create-DesktopShortcut {
         $shortcut = $shell.CreateShortcut($shortcutPath)
         $shortcut.TargetPath = $targetPath
         $shortcut.WorkingDirectory = Split-Path $targetPath -Parent
-        $shortcut.Description = "SETERA Ferramentas v1.4 - Dashboard de Ferramentas de Desenvolvimento"
+        $shortcut.Description = "SETERA Ferramentas v1.5 - Dashboard de Ferramentas de Desenvolvimento"
         $shortcut.Save()
 
         # Release COM object

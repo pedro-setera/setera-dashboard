@@ -2,16 +2,16 @@
 
 A modern desktop dashboard for managing and launching SETERA's suite of development tools for STR1010, STR1010Plus, and STR2020 trackers.
 
-![SETERA Ferramentas v1.3](dashboard-electron/assets/logo.png)
+![SETERA Ferramentas v1.5](dashboard-electron/assets/logo.png)
 
 ## 🚀 Overview
 
-The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 23+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
+The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 25+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
 
 ## 📋 Features
 
 - **Instant Startup**: Desktop application launches in under 1 second
-- **23+ Integrated Tools**: Easy access to all SETERA development utilities
+- **25+ Integrated Tools**: Easy access to all SETERA development utilities
 - **Modern Interface**: Clean, responsive design with search functionality
 - **Portable Distribution**: Single executable with no installation required
 - **Administrative Privileges**: Automatic UAC elevation for tools requiring admin rights
@@ -24,6 +24,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **serial_1ch, serial_2ch, serial_4ch** - Multi-channel serial communication
 - **gprs-server** - GPRS server management
 - **simulador_nmea** - NMEA protocol simulator
+- **parser_nmea** - NMEA sentence parser and interpreter
 
 ### STR1010/STR1010Plus Tools
 - **parser_STR1010Plus** - STR1010Plus data parser
@@ -40,6 +41,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **rpm_analysis** - RPM data analysis with web interface
 - **gauge** - Real-time gauge display
 - **tpms** - Tire Pressure Monitoring System tools
+- **tpms-identifier** - TPMS sensor identifier via serial communication
 - **simulador_tpms** - TPMS simulator (now opens maximized)
 
 ### Specialized Tools
@@ -84,7 +86,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 #### Python Dependencies
 Install required Python packages for all tools:
 ```bash
-pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asammdf pyqtgraph pyperclip requests pyserial tkcalendar tkintermapview xlsxwriter canalystii pywin32 numpy scipy standard-telnetlib
+pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asammdf pyqtgraph pyperclip requests pyserial tkcalendar tkintermapview xlsxwriter canalystii pywin32 numpy scipy standard-telnetlib pynmea2
 
 ```
 
@@ -103,6 +105,8 @@ pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asa
 - **numpy**: Numerical computing (used by `SimulaCAN`)
 - **scipy**: Scientific computing (used by `SimulaCAN`)
 - **asammdf**: MF4 file format support (used by `SimulaCAN`)
+- **pynmea2**: NMEA 0183 protocol parser (used by `parser_nmea`)
+- **pyserial**: Serial communication (used by `tpms-identifier`, serial monitors, and other tools)
 
 #### Build Setup
 ```bash
@@ -211,5 +215,5 @@ For technical support or questions:
 
 ---
 
-**SETERA Ferramentas v1.4 - 26Set2025**
+**SETERA Ferramentas v1.5 - 01Out2025**
 Built with ❤️ using Electron and Node.js
