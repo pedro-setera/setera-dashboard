@@ -205,6 +205,35 @@ expressApp.post('/launch-stm32', async (req, res) => {
   }
 });
 
+expressApp.post('/launch-url', async (req, res) => {
+  try {
+    const { url_path } = req.body;
+
+    if (!url_path) {
+      return res.json({ success: false, error: 'Caminho da URL não fornecido' });
+    }
+
+    // Build full path to the HTML file
+    const fullPath = path.join(TOOLS_PATH, url_path);
+
+    // Check if file exists
+    if (!fs.existsSync(fullPath)) {
+      return res.json({ success: false, error: `Arquivo não encontrado: ${url_path}` });
+    }
+
+    // Convert to file:// URL format
+    const fileUrl = 'file://' + fullPath.replace(/\\/g, '/');
+
+    // Open in default browser
+    shell.openExternal(fileUrl);
+
+    res.json({ success: true, message: 'URL aberta no navegador padrão' });
+
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 expressApp.post('/launch', async (req, res) => {
   try {
     const { app_path } = req.body;

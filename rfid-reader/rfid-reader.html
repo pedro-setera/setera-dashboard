@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Leitor MIFARE → GPS Hex</title>
+  <style>
+    /* Reset básico */
+    * { margin:0; padding:0; box-sizing: border-box; }
+    html, body { height:100%; font-family: Arial, sans-serif; transition: background 0.3s, color 0.3s; }
+
+    /* Temas */
+    body { background: #f0f2f5; color: #333; }
+    body.dark { background: #1a1a1a; color: #e0e0e0; }
+
+    body { display: flex; justify-content: center; align-items: center; padding: 1rem; }
+
+    /* Container central */
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    body.dark .container {
+      background: #2a2a2a;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #333;
+      flex: 1;
+    }
+    body.dark h1 { color: #e0e0e0; }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      background: none;
+      border: 2px solid #0066cc;
+      color: #0066cc;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle:hover {
+      background: #0066cc;
+      color: #fff;
+    }
+    body.dark .theme-toggle {
+      border-color: #4a9eff;
+      color: #4a9eff;
+    }
+    body.dark .theme-toggle:hover {
+      background: #4a9eff;
+      color: #1a1a1a;
+    }
+
+    #prompt {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+    body.dark #prompt { color: #aaa; }
+
+    /* Exibição do código atual */
+    .code-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.5rem;
+      color: #222;
+      background: #f7f7f7;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    body.dark .code-display {
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .code-display.success {
+      animation: successPulse 0.5s ease;
+    }
+    .code-display.duplicate {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+    }
+    body.dark .code-display.duplicate {
+      background: #664d03;
+      border-color: #ffc107;
+    }
+
+    @keyframes successPulse {
+      0%, 100% { background: #f7f7f7; }
+      50% { background: #d4edda; transform: scale(1.02); }
+    }
+    body.dark .code-display.success {
+      animation: successPulseDark 0.5s ease;
+    }
+    @keyframes successPulseDark {
+      0%, 100% { background: #1a1a1a; }
+      50% { background: #155724; transform: scale(1.02); }
+    }
+
+    /* Estatísticas */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    body.dark .stats { color: #aaa; }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0066cc;
+    }
+    body.dark .stat-value { color: #4a9eff; }
+
+    /* Botões */
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0066cc;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:disabled {
+      background: #aaaaaa;
+      cursor: default;
+    }
+    button:not(:disabled):hover {
+      background: #005bb5;
+    }
+    button.secondary {
+      background: #6c757d;
+    }
+    button.secondary:not(:disabled):hover {
+      background: #5a6268;
+    }
+    button.export {
+      background: #28a745;
+    }
+    button.export:not(:disabled):hover {
+      background: #218838;
+    }
+
+    /* Lista de histórico */
+    .history-section {
+      margin-top: 2rem;
+      border-top: 2px solid #e0e0e0;
+      padding-top: 1.5rem;
+    }
+    body.dark .history-section {
+      border-top-color: #444;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+    body.dark .history-title { color: #e0e0e0; }
+
+    .history-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      background: #fafafa;
+    }
+    body.dark .history-list {
+      background: #1a1a1a;
+      border-color: #444;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.2s;
+    }
+    body.dark .history-item {
+      border-bottom-color: #333;
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-item:hover {
+      background: #f0f0f0;
+    }
+    body.dark .history-item:hover {
+      background: #2a2a2a;
+    }
+    .history-item.duplicate-entry {
+      background: #fff3cd;
+    }
+    body.dark .history-item.duplicate-entry {
+      background: #664d03;
+    }
+
+    .history-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1;
+    }
+    .history-time {
+      font-size: 0.75rem;
+      color: #888;
+    }
+    body.dark .history-time { color: #999; }
+    .history-code {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      color: #222;
+      margin-top: 0.25rem;
+    }
+    body.dark .history-code { color: #e0e0e0; }
+
+    .history-copy {
+      background: #0066cc;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.3rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .history-copy:hover {
+      background: #005bb5;
+    }
+
+    .empty-history {
+      padding: 2rem;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Warning icon */
+    .warning-icon {
+      color: #ffc107;
+      margin-left: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    /* Scrollbar customization */
+    .history-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .history-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 0.5rem;
+    }
+    body.dark .history-list::-webkit-scrollbar-track {
+      background: #2a2a2a;
+    }
+    .history-list::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 0.5rem;
+    }
+    .history-list::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Leitor MIFARE → GPS Hex</h1>
+      <button class="theme-toggle" id="themeToggle" title="Alternar tema">🌓</button>
+    </div>
+
+    <p id="prompt">Faça a leitura do cartão</p>
+    <div class="code-display" id="hexCode">—</div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-value" id="totalScans">0</span>
+        <span>Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="uniqueCards">0</span>
+        <span>Únicos</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="copyBtn" disabled>COPIAR CÓDIGO</button>
+      <button id="clearBtn" class="secondary">LIMPAR</button>
+      <button id="exportBtn" class="export">EXPORTAR CSV</button>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <span class="history-title">Histórico de Leituras</span>
+        <button id="clearHistoryBtn" class="secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Limpar Histórico</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="empty-history">Nenhuma leitura ainda</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado da aplicação
+    let buffer = "";
+    let history = [];
+    let lastHex = null;
+    const MAX_HISTORY = 20;
+
+    // Carrega dados do LocalStorage
+    function loadFromStorage() {
+      const stored = localStorage.getItem('rfidHistory');
+      if (stored) {
+        try {
+          history = JSON.parse(stored);
+          renderHistory();
+          updateStats();
+        } catch(e) {
+          console.error('Erro ao carregar histórico:', e);
+        }
+      }
+
+      // Carrega tema (dark mode por padrão)
+      const theme = localStorage.getItem('rfidTheme');
+      if (theme === 'light') {
+        // Se o usuário escolheu light mode explicitamente
+        document.body.classList.remove('dark');
+      } else {
+        // Dark mode por padrão (null ou 'dark')
+        document.body.classList.add('dark');
+      }
+    }
+
+    // Salva histórico no LocalStorage
+    function saveToStorage() {
+      localStorage.setItem('rfidHistory', JSON.stringify(history));
+    }
+
+    // Captura todas as teclas (o leitor emula teclado)
+    document.addEventListener('keydown', e => {
+      // Apenas dígitos
+      if (e.key.length === 1 && /\d/.test(e.key)) {
+        buffer += e.key;
+        e.preventDefault();
+      }
+      // Enter dispara o processamento
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        processBuffer();
+      }
+    });
+
+    function processBuffer() {
+      if (!buffer) return;
+      const dec = buffer;
+      buffer = "";
+
+      // Converte para número e formata em HEX + "00"
+      const n = parseInt(dec, 10);
+      if (isNaN(n)) {
+        showPrompt("Erro: UID inválido");
+        setTimeout(() => showPrompt("Faça a leitura do cartão"), 2000);
+        return;
+      }
+      const hex = n.toString(16).toUpperCase().padStart(8, '0') + "00";
+
+      // Verifica duplicata
+      const isDuplicate = hex === lastHex;
+
+      // Adiciona ao histórico
+      const entry = {
+        timestamp: new Date().toISOString(),
+        decimal: dec,
+        hex: hex,
+        isDuplicate: isDuplicate
+      };
+
+      history.unshift(entry); // Adiciona no início
+      if (history.length > MAX_HISTORY) {
+        history = history.slice(0, MAX_HISTORY);
+      }
+
+      saveToStorage();
+      renderHistory();
+      updateStats();
+
+      // Exibe código atual
+      const codeDisplay = document.getElementById('hexCode');
+      codeDisplay.textContent = hex;
+      codeDisplay.className = 'code-display';
+
+      if (isDuplicate) {
+        codeDisplay.classList.add('duplicate');
+        showPrompt("⚠️ Cartão duplicado detectado!");
+      } else {
+        codeDisplay.classList.add('success');
+        showPrompt("");
+      }
+
+      document.getElementById('copyBtn').disabled = false;
+      lastHex = hex;
+    }
+
+    // Renderiza lista de histórico
+    function renderHistory() {
+      const listEl = document.getElementById('historyList');
+
+      if (history.length === 0) {
+        listEl.innerHTML = '<div class="empty-history">Nenhuma leitura ainda</div>';
+        return;
+      }
+
+      listEl.innerHTML = history.map((entry, index) => {
+        const date = new Date(entry.timestamp);
+        const timeStr = date.toLocaleTimeString('pt-BR');
+        const dateStr = date.toLocaleDateString('pt-BR');
+        const duplicateClass = entry.isDuplicate ? 'duplicate-entry' : '';
+        const warningIcon = entry.isDuplicate ? '<span class="warning-icon" title="Duplicado">⚠️</span>' : '';
+
+        return `
+          <div class="history-item ${duplicateClass}">
+            <div class="history-info">
+              <span class="history-time">${dateStr} ${timeStr}${warningIcon}</span>
+              <span class="history-code">${entry.hex}</span>
+            </div>
+            <button class="history-copy" onclick="copyHistoryItem('${entry.hex}')">Copiar</button>
+          </div>
+        `;
+      }).join('');
+
+      // Auto-scroll para o topo (entrada mais recente)
+      listEl.scrollTop = 0;
+    }
+
+    // Copia item do histórico
+    window.copyHistoryItem = function(hex) {
+      navigator.clipboard.writeText(hex).then(() => {
+        showPrompt("Código copiado: " + hex);
+        setTimeout(() => showPrompt("Faça a leitura do cartão"), 1500);
+      });
+    };
+
+    // Atualiza estatísticas
+    function updateStats() {
+      document.getElementById('totalScans').textContent = history.length;
+
+      const uniqueHexes = new Set(history.map(e => e.hex));
+      document.getElementById('uniqueCards').textContent = uniqueHexes.size;
+    }
+
+    // Atualiza texto de prompt
+    function showPrompt(msg) {
+      document.getElementById('prompt').textContent = msg;
+    }
+
+    // Copia código atual
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const hex = document.getElementById('hexCode').textContent;
+      navigator.clipboard.writeText(hex).then(() => {
+        showPrompt("Código copiado com sucesso");
+        setTimeout(() => {
+          showPrompt("Faça a leitura do cartão");
+          document.getElementById('copyBtn').disabled = true;
+          document.getElementById('hexCode').textContent = "—";
+          document.getElementById('hexCode').className = 'code-display';
+          lastHex = null;
+        }, 2000);
+      });
+    });
+
+    // Limpa código atual
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('hexCode').textContent = "—";
+      document.getElementById('hexCode').className = 'code-display';
+      document.getElementById('copyBtn').disabled = true;
+      showPrompt("Faça a leitura do cartão");
+      lastHex = null;
+    });
+
+    // Limpa histórico
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      if (history.length === 0) return;
+
+      if (confirm('Deseja realmente limpar todo o histórico?')) {
+        history = [];
+        saveToStorage();
+        renderHistory();
+        updateStats();
+        showPrompt("Histórico limpo com sucesso");
+        setTimeout(() => showPrompt("Faça a leitura do cartão"), 1500);
+      }
+    });
+
+    // Exporta para CSV
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      if (history.length === 0) {
+        alert('Nenhum dado para exportar');
+        return;
+      }
+
+      // Prepara CSV
+      const uniqueHexes = new Set(history.map(e => e.hex));
+      const csvHeader = `# Histórico de Leituras RFID\n# Total de leituras: ${history.length}\n# Cartões únicos: ${uniqueHexes.size}\n# Exportado em: ${new Date().toLocaleString('pt-BR')}\n\nData,Hora,UID Decimal,Código Hex,Duplicado\n`;
+
+      const csvRows = history.map(entry => {
+        const date = new Date(entry.timestamp);
+        const dateStr = date.toLocaleDateString('pt-BR');
+        const timeStr = date.toLocaleTimeString('pt-BR');
+        const dupStr = entry.isDuplicate ? 'Sim' : 'Não';
+        return `${dateStr},${timeStr},${entry.decimal},${entry.hex},${dupStr}`;
+      }).join('\n');
+
+      const csv = csvHeader + csvRows;
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', `rfid-history-${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showPrompt("CSV exportado com sucesso");
+      setTimeout(() => showPrompt("Faça a leitura do cartão"), 1500);
+    });
+
+    // Toggle tema
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('rfidTheme', isDark ? 'dark' : 'light');
+    });
+
+    // Inicializa
+    loadFromStorage();
+  </script>
+</body>
+</html>

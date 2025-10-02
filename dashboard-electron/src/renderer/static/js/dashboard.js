@@ -134,6 +134,42 @@ async function launchSTM32Programmer() {
     }
 }
 
+// Launch URL in default browser
+async function launchURL(urlPath) {
+    // Show loading overlay
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+
+    try {
+        // Send request to Express backend to open URL in default browser
+        const response = await fetch('/launch-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                url_path: urlPath
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Success feedback - shorter timeout for better UX
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 800);
+        } else {
+            // Error handling
+            overlay.classList.remove('active');
+            alert(`Erro ao abrir URL: ${result.error}`);
+        }
+    } catch (error) {
+        overlay.classList.remove('active');
+        alert(`Erro de conexão: ${error.message}\nVerifique se o servidor interno está funcionando.`);
+    }
+}
+
 // Keyboard Shortcuts
 function initializeKeyboardShortcuts() {
     document.addEventListener('keydown', function(e) {
