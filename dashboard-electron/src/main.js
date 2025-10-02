@@ -181,7 +181,7 @@ expressApp.get('/', (req, res) => {
 });
 
 expressApp.get('/status', (req, res) => {
-  res.json({ status: 'running', version: '1.4' });
+  res.json({ status: 'running', version: '1.6' });
 });
 
 expressApp.post('/launch-stm32', async (req, res) => {
@@ -333,7 +333,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, '../assets/logo.ico'),
-    title: 'SETERA Ferramentas v1.4 - 26Set2025',
+    title: 'SETERA Ferramentas v1.6 - 02Out2025',
     autoHideMenuBar: true
   });
 

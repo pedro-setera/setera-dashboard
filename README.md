@@ -2,16 +2,16 @@
 
 A modern desktop dashboard for managing and launching SETERA's suite of development tools for STR1010, STR1010Plus, and STR2020 trackers.
 
-![SETERA Ferramentas v1.5](dashboard-electron/assets/logo.png)
+![SETERA Ferramentas v1.6](dashboard-electron/assets/logo.png)
 
 ## 🚀 Overview
 
-The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 26+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
+The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 27+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
 
 ## 📋 Features
 
 - **Instant Startup**: Desktop application launches in under 1 second
-- **26+ Integrated Tools**: Easy access to all SETERA development utilities
+- **27+ Integrated Tools**: Easy access to all SETERA development utilities
 - **Modern Interface**: Clean, responsive design with search functionality
 - **Portable Distribution**: Single executable with no installation required
 - **Administrative Privileges**: Automatic UAC elevation for tools requiring admin rights
@@ -50,6 +50,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **simulador_tilt** - Tilt sensor simulator (now opens maximized)
 - **check_cpf** - CPF validation utility
 - **config_str1010** - STR1010 configuration utility
+- **rfid-reader** - RFID card reader for MIFARE to GPS hex conversion with history tracking
 
 ### Configuration Tools (Separate Repositories)
 - **ConfigSTR1010** - Available at [config-fota-str1010](https://github.com/pedro-setera/config-fota-str1010)
@@ -215,5 +216,5 @@ For technical support or questions:
 
 ---
 
-**SETERA Ferramentas v1.5 - 01Out2025**
+**SETERA Ferramentas v1.6 - 02Out2025**
 Built with ❤️ using Electron and Node.js

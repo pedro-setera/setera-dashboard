@@ -252,7 +252,7 @@ function addHoverEffects() {
 addHoverEffects();
 
 // Console welcome message (Electron version)
-console.log('%c SETERA Ferramentas v1.4 - Desktop App ', 'background: #0984e3; color: white; font-size: 16px; padding: 5px 10px; border-radius: 5px;');
+console.log('%c SETERA Ferramentas v1.6 - Desktop App ', 'background: #0984e3; color: white; font-size: 16px; padding: 5px 10px; border-radius: 5px;');
 console.log('%c Dashboard Electron carregado com sucesso! ', 'color: #74b9ff; font-size: 12px;');
 console.log('%c Atalhos: Ctrl+F (busca), F11 (tela cheia) ', 'color: #a0a0a0; font-size: 10px;');
 console.log('%c Desktop app - nenhum servidor externo necessário ', 'color: #00b894; font-size: 10px;');
