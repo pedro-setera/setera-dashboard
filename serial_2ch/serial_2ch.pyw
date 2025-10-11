@@ -207,7 +207,7 @@ class SerialCollectorQuadrant(tk.Frame):
         ttk.Label(self, text="Envio:").grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="w")
 
         # Change send_text_entry to a Combobox with autocomplete
-        self.send_text_combobox = ttk.Combobox(self, textvariable=self.send_text_var, values=self.commands)
+        self.send_text_combobox = ttk.Combobox(self, textvariable=self.send_text_var, values=self.commands, height=20)
         self.send_text_combobox.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="ew")
 
         # Bind events for autocomplete and capitalization
