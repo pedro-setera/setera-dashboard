@@ -1,6 +1,6 @@
 {
   "name": "setera-dashboard",
-  "version": "1.6.0",
+  "version": "1.57.0",
   "description": "SETERA Ferramentas Dashboard - Desktop Application",
   "main": "src/main.js",
   "scripts": {

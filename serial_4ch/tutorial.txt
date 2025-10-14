@@ -1,7 +1,0 @@
-1 - Os 4 canais são independentes e podem mandar e receber dados em ASCII ou HEX, usando o botão toggle ASCII/HEX.
-2 - Para mandar em HEX, na caixa de texto de envio os bytes deverão ser separados por espaço e sem '0x'. Por exemplo 00 FF 2C 3B.
-3 - Envio temporizado de 1 segundo, marcar o checkbox 1s.
-4 - Envio único clicar no botão ENVIAR.
-5 - Se quiser adicionar CR LF no final da linha, marca o checkbox CRLF
-6 - No dropdown do texto de envio estão todos os comandos constantes do arquivo commands.ini, com edição livre.
-7 - O campo de filtro é dinâmico, conforme digita ele vai filtrando só as linhas que tiverem o texto do filtro.

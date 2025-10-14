@@ -333,7 +333,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, '../assets/logo.ico'),
-    title: 'SETERA Ferramentas v1.6 - 02Out2025',
+    title: 'SETERA Ferramentas v1.57 - 14Out2025',
     autoHideMenuBar: true
   });
 

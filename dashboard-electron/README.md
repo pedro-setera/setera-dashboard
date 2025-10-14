@@ -28,7 +28,7 @@ npm run dist
 ```
 
 This will create:
-- `dist/SETERA-Dashboard-1.2.0-portable.exe` - Portable executable
+- `dist/SETERA-Ferramentas.exe` - Portable executable in `dist/win-unpacked/` folder
 
 ### Distribution
 
@@ -77,3 +77,18 @@ dashboard-electron/
 - In development mode (`--dev`), it looks for tools in `../../..` (relative to project)
 - In production, it looks for tools relative to the executable location
 - All Python scripts are launched with proper working directories
+
+## 📝 Changelog
+
+### v1.57 - 14Out2025
+- **Novo**: Adicionado "Config/Update Leitor CAN" na seção Configuração e Atualização
+  - Ferramenta para atualização de firmware e configuração de leitores CANBUS
+  - Suporta comandos VERSIONS, LIMITS e atualização via arquivos .frm
+  - Detecção automática de dispositivos dormentes com retry inteligente
+  - Monitoramento FR1 para habilitação/desabilitação automática de botões
+  - Interface com feedback visual por cores (verde=ativo, vermelho=inativo)
+
+### v1.6 - 02Out2025
+- Lançamento inicial do dashboard Electron
+- Migração da interface web para aplicação desktop
+- Suporte completo para todas as ferramentas SETERA existentes
