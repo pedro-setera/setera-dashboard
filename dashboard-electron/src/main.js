@@ -327,6 +327,7 @@ const createWindow = () => {
     width: 1400,
     height: 900,
     show: false, // Don't show until ready
+    backgroundColor: '#0d1117', // Match dashboard dark background
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

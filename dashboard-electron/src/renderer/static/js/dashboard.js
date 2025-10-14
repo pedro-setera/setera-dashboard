@@ -1,5 +1,16 @@
 // Dashboard JavaScript - Search and Launch Functionality (Electron Version)
 
+// Remove splash screen after animation completes
+window.addEventListener('load', function() {
+    const splashScreen = document.getElementById('splashScreen');
+    if (splashScreen) {
+        // Remove splash screen after 2.5s (matches animation duration)
+        setTimeout(() => {
+            splashScreen.remove();
+        }, 2500);
+    }
+});
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeSearch();
