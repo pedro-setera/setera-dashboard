@@ -1,16 +1,5 @@
 // Dashboard JavaScript - Search and Launch Functionality (Electron Version)
 
-// Remove splash screen after animation completes
-window.addEventListener('load', function() {
-    const splashScreen = document.getElementById('splashScreen');
-    if (splashScreen) {
-        // Remove splash screen after 2.5s (matches animation duration)
-        setTimeout(() => {
-            splashScreen.remove();
-        }, 2500);
-    }
-});
-
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeSearch();
@@ -228,39 +217,6 @@ setTimeout(() => {
         overlay.classList.remove('active');
     }
 }, 5000);
-
-// Add visual feedback for app card clicks
-document.querySelectorAll('.app-card').forEach(card => {
-    card.addEventListener('click', function() {
-        // Add visual feedback for clicking
-        this.style.transform = 'translateY(-4px) scale(0.98)';
-        setTimeout(() => {
-            this.style.transform = '';
-        }, 150);
-    });
-});
-
-// Category animation on page load
-window.addEventListener('load', function() {
-    const sections = document.querySelectorAll('.category-section');
-    sections.forEach((section, index) => {
-        section.style.animationDelay = `${index * 0.1}s`;
-    });
-});
-
-// Add hover effects
-function addHoverEffects() {
-    const cards = document.querySelectorAll('.app-card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            // Visual feedback is handled by CSS
-            // Simple hover effect without modal
-        });
-    });
-}
-
-// Initialize hover effects
-addHoverEffects();
 
 // Console welcome message (Electron version)
 console.log('%c SETERA Ferramentas v1.6 - Desktop App ', 'background: #0984e3; color: white; font-size: 16px; padding: 5px 10px; border-radius: 5px;');

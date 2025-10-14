@@ -326,8 +326,8 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
-    show: false, // Don't show until ready
-    backgroundColor: '#0d1117', // Match dashboard dark background
+    show: false, // Don't show until ready to prevent flashing
+    backgroundColor: '#0d1117', // Dark background matching dashboard
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -344,7 +344,7 @@ const createWindow = () => {
   // Load the dashboard
   mainWindow.loadURL(`http://localhost:${PORT}`);
 
-  // Show window when ready
+  // Show window when ready (prevents white flash)
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
