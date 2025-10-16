@@ -80,6 +80,13 @@ dashboard-electron/
 
 ## 📝 Changelog
 
+### v1.59 - 17Out2025
+- **Novo**: Adicionado "Atualiza Módulo Áudio" na seção Configuração e Atualização
+  - Ferramenta para atualização de firmware do módulo de áudio WTV380/Waytronic via UART
+  - Interface gráfica com progress bar e logging detalhado
+  - Suporta flooding handshake e protocolo proprietário de atualização
+  - Auto-detecção de arquivos .bin no diretório da ferramenta
+
 ### v1.58 - 16Out2025
 - **Atualização**: Config/Update STR1010/600P (remoto) agora utiliza Config_STR1010_v127_16Out2025.exe
   - Versão atualizada da ferramenta de configuração remota
