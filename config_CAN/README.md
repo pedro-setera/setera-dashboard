@@ -1,37 +1,44 @@
-# Atualização e Configuração - Leitor CANBUS v1.0
+# Atualização e Configuração - Leitor CANBUS v1.4
 
 ## Descrição
 
-Software de atualização de firmware e configuração para leitores CANBUS da SETERA. Esta ferramenta permite atualizar o firmware de dispositivos CANBUS e configurar limites operacionais (RPM e velocidade) através de comunicação serial, fornecendo uma interface gráfica intuitiva com monitoramento em tempo real.
+Software de atualização de firmware e configuração para leitores CANBUS da SETERA. Esta ferramenta permite atualizar o firmware de dispositivos CANBUS e configurar limites operacionais (RPM e velocidade) através de comunicação serial, fornecendo uma interface gráfica intuitiva com monitoramento em tempo real e workflow unificado.
 
-**Versão:** 1.0
-**Data de Lançamento:** 14Out2025
+**Versão:** 1.4
+**Data de Lançamento:** 16Out2025
 **Parte do:** SETERA Dashboard Tools Suite
 
 ## Características
 
 - **Interface Gráfica Intuitiva**: Desenvolvida em Python Tkinter com todos os textos em Português Brasileiro
+- **Suporte Universal V2 e V3+**: Detecção automática e protocolo otimizado para dispositivos V2 (firmware 2.x) e V3+ (firmware 3.x)
 - **Detecção Automática de Portas COM**: Atualização automática a cada 1 segundo das portas seriais disponíveis
 - **Comunicação Serial Configurada**: Taxa de transmissão fixa de 115200 baud
-- **Atualização de Firmware**:
-  - Seleção manual de arquivos .frm
+- **Workflow Unificado de Atualização e Configuração**:
+  - Processo integrado: firmware + configuração em uma única operação
+  - Seleção de arquivo .frm na pasta Downloads
+  - Configuração de limites pré-preenchida (90 km/h, 2400 RPM)
+  - Aplicação automática da configuração após atualização de firmware
   - Barra de progresso com percentual preciso
-  - Mecanismo de retry automático (5 tentativas)
-  - Notificações de sucesso/falha
+  - Mecanismo de retry automático (5 tentativas para UPDATE, 3 para LIMITS)
+  - Notificações de sucesso/falha detalhadas
 - **Configuração de Limites**:
-  - Velocidade máxima (10-200 km/h)
-  - Limite de RPM (100-10000, múltiplos de 64)
-  - Diálogo de configuração intuitivo
+  - Velocidade máxima (10-200 km/h) - padrão 90 km/h
+  - Limite de RPM (100-10000, múltiplos de 64) - padrão 2400 RPM
+  - Diálogo de configuração intuitivo com valores pré-preenchidos
   - Validação de entrada em tempo real
+  - Aplicação automática após firmware update
 - **Detecção Inteligente de Dispositivo**:
   - Ativação automática de dispositivos dormentes
   - Detecção de modo sleep (sem FR1 por 2+ segundos)
   - Habilitação/desabilitação automática de botões
   - Feedback visual com cores (verde=ativo, vermelho=inativo)
-- **Sistema de Log Detalhado**:
+- **Sistema de Log Otimizado**:
   - Timestamps com precisão de milissegundos
-  - Codificação por cores (branco=TX, amarelo=RX, verde=sucesso, vermelho=erro)
-  - Registro completo de toda a comunicação
+  - Codificação por cores (branco=TX, amarelo=RX, verde limão=sucesso, laranja=erro)
+  - Supressão inteligente de frames FR1 e dados de firmware durante update
+  - Progresso mostrado a cada 1000 frames
+  - Log limpo e legível
 - **Mecanismo de Retry Inteligente**:
   - 3 tentativas para comandos VERSIONS e LIMITS
   - 5 tentativas para início de atualização de firmware
@@ -89,53 +96,58 @@ ou simplesmente clique duas vezes no arquivo `config_can.pyw`
 5. O software envia comando VERSIONS automaticamente (3 tentativas com retry inteligente)
 6. Após conexão bem-sucedida:
    - Informações do dispositivo aparecem na interface (FW, SN)
-   - Botões **INICIAR UPDATE** e **CONFIGURAR** ficam verdes (habilitados)
+   - Botão **INICIAR UPDATE** fica verde (habilitado)
    - Monitoramento FR1 inicia automaticamente
 
-### 4. Atualização de Firmware
+### 4. Atualização de Firmware e Configuração (Processo Unificado)
 
-#### Passo 1: Selecionar Firmware
-1. Clique no botão **SELECIONAR FIRMWARE**
-2. Navegue até o arquivo .frm desejado
-3. Selecione o arquivo e clique em "Abrir"
-4. O software irá analisar o arquivo e exibir informações no log:
+#### Passo 1: Iniciar Processo
+1. Com o dispositivo conectado, clique no botão **INICIAR UPDATE**
+2. O file picker abrirá automaticamente na pasta **Downloads**
+3. Selecione o arquivo .frm desejado e clique em "Abrir"
+4. O software analisa o arquivo e exibe informações no log:
    - Número serial do dispositivo
    - Versão do firmware
    - Número total de frames
    - Checksum
 
-#### Passo 2: Iniciar Atualização
-1. Após selecionar o firmware, clique no botão **INICIAR UPDATE**
-2. Acompanhe o progresso através da:
+#### Passo 2: Configurar Limites
+1. Após selecionar o firmware, o diálogo de configuração abre automaticamente
+2. Os campos vêm pré-preenchidos com:
+   - **Velocidade Máxima**: 90 km/h
+   - **Limite RPM**: 2400 RPM
+3. Ajuste os valores conforme necessário:
+   - **Velocidade Máxima**: 10-200 km/h
+   - **Limite RPM**: 100-10000 (será arredondado para múltiplo de 64)
+4. Clique em **OK** para continuar ou **CANCELAR** para abortar
+
+#### Passo 3: Confirmar Atualização
+1. Um diálogo de confirmação mostra:
+   - Versão do firmware a ser instalado
+   - Número de frames
+   - Configuração de limites que será aplicada
+2. Clique em **SIM** para confirmar ou **NÃO** para cancelar
+
+#### Passo 4: Acompanhar Progresso
+1. A atualização inicia automaticamente:
+   - Comando @FRM,START enviado
+   - Frames de firmware enviados (progresso a cada 1000 frames)
+   - Comando @FRM,UPGRADE enviado
+   - Aguarda 1 segundo
+   - Comando LIMITS enviado automaticamente
+2. Acompanhe através da:
    - Barra de progresso verde
    - Percentual exibido ao lado da barra
-   - Log detalhado de comunicação
-3. **NÃO** desconecte o dispositivo durante a atualização
+   - Log detalhado (sem poluição de frames FR1 ou dados de firmware)
+3. **NÃO** desconecte o dispositivo durante o processo
 
-#### Passo 3: Conclusão
-- Se bem-sucedido: Popup "Atualização concluída com sucesso!"
-- Se houver erro: Mensagem de erro com detalhes
+#### Passo 5: Conclusão
+- Se bem-sucedido: Popup "Atualização de firmware e configuração concluídas com sucesso!"
+- Se houver erro no firmware: Mensagem de erro específica (ex: ERR#82 para firmware incompatível)
+- Se configuração falhar: Firmware é atualizado, mas aparece aviso sobre falha na configuração
 - Após conclusão: Desconecte clicando em **DESCONECTAR** se necessário
 
-### 5. Configuração de Limites
-
-#### Passo 1: Abrir Diálogo de Configuração
-1. Com o dispositivo conectado e botões habilitados (verdes)
-2. Clique no botão **CONFIGURAR**
-3. Diálogo de configuração será aberto
-
-#### Passo 2: Inserir Valores
-1. **Velocidade Máxima**: Digite um valor entre 10 e 200 km/h
-2. **Limite RPM**: Digite um valor entre 100 e 10000
-   - O software automaticamente arredonda para o múltiplo de 64 mais próximo
-3. Clique em **OK** para aplicar ou **Cancelar** para descartar
-
-#### Passo 3: Confirmação
-- Comando LIMITS é enviado com retry automático (3 tentativas)
-- Mensagem de sucesso/erro aparece no log
-- Configurações são aplicadas imediatamente no dispositivo
-
-### 6. Detecção Automática de Sleep
+### 5. Detecção Automática de Sleep
 
 O software monitora automaticamente a atividade do dispositivo:
 
@@ -173,29 +185,37 @@ C0x4A2F
 ...
 ```
 
-## Protocolo de Atualização
+## Protocolo de Atualização e Configuração
 
-O software implementa o protocolo descrito nas seções 7.1-7.3 do documento `canbus_reader_protocol.pdf`:
+O software implementa o protocolo descrito nas seções 7.1-7.3 do documento `canbus_reader_protocol.pdf`, com adição de configuração automática:
 
 1. **Inicialização**: Envio do comando `@FRM,START`
 2. **Transferência de Frames**: Envio sequencial de todos os frames com confirmação `OK` após cada frame
-3. **Finalização**: Envio do comando `@FRM,UPGRADE` para aplicar o firmware
+3. **Aplicação do Firmware**: Envio do comando `@FRM,UPGRADE` para aplicar o firmware
+4. **Aguardo**: Pausa de 1 segundo após confirmação do UPGRADE
+5. **Configuração Automática**: Envio do comando `LIMITS,<speed>,0,<rpm>` com retry (3 tentativas)
 
 ### Formato de Comunicação
 - **Header**: (vazio)
 - **Footer**: `\r\n` (CR+LF)
 - **Respostas Esperadas**:
-  - Sucesso: `OK`
+  - Sucesso: `OK` ou `LIMITS:OK`
   - Erro: `ERR#<código>`
+  - ERR#82: Firmware não corresponde ao número de série do dispositivo
 
 ## Sistema de Log
 
 ### Cores
 - **Branco**: Dados enviados ao dispositivo (TX)
 - **Amarelo**: Dados recebidos do dispositivo (RX)
-- **Verde**: Mensagens de sucesso
-- **Vermelho**: Mensagens de erro
+- **Verde Limão**: Mensagens de sucesso (melhor contraste)
+- **Laranja**: Mensagens de erro (melhor contraste)
 - **Ciano**: Informações gerais
+
+### Supressão Inteligente
+- **Frames FR1**: Não aparecem no log (mas são monitorados internamente)
+- **Dados de Firmware**: Durante update, apenas comandos START/UPGRADE e progresso a cada 1000 frames são exibidos
+- **Resultado**: Log limpo, legível e focado em informações relevantes
 
 ### Formato de Timestamp
 Todos os logs incluem timestamp no formato: `[HH:MM:SS.mmm]`
@@ -240,6 +260,29 @@ Todos os logs incluem timestamp no formato: `[HH:MM:SS.mmm]`
 Para questões técnicas ou problemas com o software, entre em contato com o suporte técnico da SETERA.
 
 ## Changelog
+
+### v1.4 - 16Out2025
+- **Suporte Completo para Dispositivos V2**: Detecção automática e protocolo otimizado para leitores V2 (firmware 2.x)
+- **Detecção Automática de Versão**: Identifica automaticamente dispositivos V2 vs V3+ baseado na resposta VERSIONS
+- **Protocolo V2 Aprimorado**:
+  - Atraso de 500ms após comando START para dispositivos V2 (preparação de memória)
+  - Tratamento correto de respostas `@FRM:OK` (com dois pontos) para V2
+  - Modo debug que loga os primeiros 5 frames para diagnóstico V2
+- **Melhor Diagnóstico**: Log detalhado de erros com resposta exata recebida do dispositivo
+- **Compatibilidade**: Mantém total compatibilidade com dispositivos V3+ (firmware 3.x)
+
+### v1.3 - 15Out2025
+- **Workflow Unificado**: Firmware update e configuração em um único processo
+- **Remoção do Botão CONFIGURAR**: Configuração agora é integrada ao processo de update
+- **Configuração Automática**: Valores pré-preenchidos (90 km/h, 2400 RPM)
+- **File Picker Otimizado**: Abre automaticamente na pasta Downloads
+- **Log Otimizado**:
+  - Supressão de frames FR1 (reduz poluição visual)
+  - Supressão de dados de firmware durante update
+  - Progresso mostrado a cada 1000 frames (ao invés de 250)
+  - Cores melhoradas: Verde limão (sucesso) e Laranja (erro) para melhor contraste
+- **Detecção de Erro ERR#82**: Mensagem específica para firmware incompatível com SN do dispositivo
+- **Processo Sequencial**: Após firmware update bem-sucedido, aguarda 1s e envia configuração LIMITS automaticamente
 
 ### v1.0 - 14Out2025
 - Lançamento inicial
