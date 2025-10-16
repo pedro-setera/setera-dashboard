@@ -80,6 +80,10 @@ dashboard-electron/
 
 ## 📝 Changelog
 
+### v1.58 - 16Out2025
+- **Atualização**: Config/Update STR1010/600P (remoto) agora utiliza Config_STR1010_v127_16Out2025.exe
+  - Versão atualizada da ferramenta de configuração remota
+
 ### v1.57 - 14Out2025
 - **Novo**: Adicionado "Config/Update Leitor CAN" na seção Configuração e Atualização
   - Ferramenta para atualização de firmware e configuração de leitores CANBUS

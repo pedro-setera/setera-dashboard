@@ -181,7 +181,7 @@ expressApp.get('/', (req, res) => {
 });
 
 expressApp.get('/status', (req, res) => {
-  res.json({ status: 'running', version: '1.6' });
+  res.json({ status: 'running', version: '1.58' });
 });
 
 expressApp.post('/launch-stm32', async (req, res) => {
@@ -323,46 +323,55 @@ const startServer = () => {
 
 // Create main window
 const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    show: false, // Don't show until ready to prevent flashing
-    backgroundColor: '#0d1117', // Dark background matching dashboard
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
-    },
-    icon: path.join(__dirname, '../assets/logo.ico'),
-    title: 'SETERA Ferramentas v1.57 - 14Out2025',
-    autoHideMenuBar: true
-  });
+  return new Promise((resolve) => {
+    mainWindow = new BrowserWindow({
+      width: 1400,
+      height: 900,
+      show: true, // Show immediately with loading screen
+      backgroundColor: '#0d1117', // Dark background matching dashboard
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'preload.js')
+      },
+      icon: path.join(__dirname, '../assets/logo.ico'),
+      title: 'SETERA Ferramentas v1.58 - 16Out2025',
+      autoHideMenuBar: true
+    });
 
-  // Maximize window on startup
-  mainWindow.maximize();
+    // Maximize window on startup
+    mainWindow.maximize();
 
-  // Load the dashboard
-  mainWindow.loadURL(`http://localhost:${PORT}`);
+    // Load simple loading screen first (instant, no server needed)
+    mainWindow.loadFile(path.join(__dirname, 'renderer', 'loading.html')).then(() => {
+      // Wait a brief moment to ensure loading screen is visible
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
 
-  // Show window when ready (prevents white flash)
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
-
-  // Handle window closed
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    if (server) {
-      server.close();
-    }
+    // Handle window closed
+    mainWindow.on('closed', () => {
+      mainWindow = null;
+      if (server) {
+        server.close();
+      }
+    });
   });
 };
 
 // App event handlers
 app.whenReady().then(async () => {
   try {
+    // Create and show window immediately with loading screen
+    // Wait for loading screen to be visible
+    await createWindow();
+
+    // Start server in background
     await startServer();
-    createWindow();
+
+    // Once server is ready, load the dashboard
+    mainWindow.loadURL(`http://localhost:${PORT}`);
   } catch (error) {
     console.error('Failed to start server:', error);
     app.quit();
