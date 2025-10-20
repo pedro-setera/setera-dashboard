@@ -1,0 +1,613 @@
+{
+  "command_types": [
+    {
+      "id": "configura_servidor_principal",
+      "name": "Configura Servidor Principal",
+      "pattern": "$TEXT_OP:MAINSERVER:",
+      "description": "Configura Servidor Principal",
+      "example": "$TEXT_OP:MAINSERVER:148.63.152.25,8552,2013",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Suporta protocolos T808: 2013/2019/905"
+    },
+    {
+      "id": "consulta_servidor_principal",
+      "name": "Consulta Servidor Principal",
+      "pattern": "$TEXT_OP:MAINSERVER",
+      "description": "Consulta Servidor Principal",
+      "example": "$TEXT_OP:MAINSERVER",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "Suporta protocolos T808: 2013/2019/905"
+    },
+    {
+      "id": "configura_servidor_secundario",
+      "name": "Configura Servidor Secundário",
+      "pattern": "$TEXT_OP:SUBSERVER:",
+      "description": "Configura Servidor Secundário",
+      "example": "$TEXT_OP:SUBSERVER:192.168.0.0,8808,2013",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Suporta protocolos T808: 2013/2019/905"
+    },
+    {
+      "id": "consulta_servidor_secundario",
+      "name": "Consulta Servidor Secundário",
+      "pattern": "$TEXT_OP:SUBSERVER",
+      "description": "Consulta Servidor Secundário",
+      "example": "$TEXT_OP:SUBSERVER",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "Suporta protocolos T808: 2013/2019/905"
+    },
+    {
+      "id": "consulta_apn",
+      "name": "Consulta APN",
+      "pattern": "$TEXT_OP:APN",
+      "description": "Consulta APN",
+      "example": "$TEXT_OP:APN",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_fuso_horario",
+      "name": "Configura Fuso Horário",
+      "pattern": "$TEXT_OP:TIMEZONE:",
+      "description": "Configura Fuso Horário",
+      "example": "$TEXT_OP:TIMEZONE:UTC-3",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "consulta_fuso_horario",
+      "name": "Consulta Fuso Horário",
+      "pattern": "$TEXT_OP:TIMEZONE",
+      "description": "Consulta Fuso Horário",
+      "example": "$TEXT_OP:TIMEZONE",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "consulta_dados_da_camera",
+      "name": "Consulta Dados da Câmera",
+      "pattern": "$TEXT_OP:DEVICEINFO",
+      "description": "Consulta Dados Gerais da Câmera",
+      "example": "$TEXT_OP:DEVICEINFO",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_tamanho_videos",
+      "name": "Configura Tamanho Vídeos",
+      "pattern": "$TEXT_OP:LOOP_REC:",
+      "description": "Configura Tempo de Gravação dos Vídeos",
+      "example": "$TEXT_OP:LOOP_REC:1",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "1 = 1 minuto\n3 = 3 minutos\n5 = 5 minutos"
+    },
+    {
+      "id": "consulta_tamanho_videos",
+      "name": "Consulta Tamanho Vídeos",
+      "pattern": "$TEXT_OP:LOOP_REC",
+      "description": "Consulta Tempo de Gravação dos Vídeos",
+      "example": "$TEXT_OP:LOOP_REC",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "1 = 1 minuto\n3 = 3 minutos\n5 = 5 minutos"
+    },
+    {
+      "id": "configura_volume",
+      "name": "Configura Volume",
+      "pattern": "$TEXT_OP:SET_VOLUME:",
+      "description": "Configura Volume do Áudio",
+      "example": "$TEXT_OP:SET_VOLUME:OFF",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "OFF = Desligado\nLOW = Baixo\nMID = Médio\nHIGH = Alto"
+    },
+    {
+      "id": "consulta_volume",
+      "name": "Consulta Volume",
+      "pattern": "$TEXT_OP:VOLUME",
+      "description": "Consulta Volume do Áudio",
+      "example": "$TEXT_OP:VOLUME",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "OFF = Desligado\nLOW = Baixo\nMID = Médio\nHIGH = Alto"
+    },
+    {
+      "id": "habilita_desabilita_audio",
+      "name": "Habilita/Desabilita Áudio",
+      "pattern": "$TEXT_OP:AUDIO:",
+      "description": "Habilita/Desabilita Áudio",
+      "example": "$TEXT_OP:AUDIO:0",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Áudio desligado\n1 = Áudio ligado"
+    },
+    {
+      "id": "consuta_habilitacao_de_audio",
+      "name": "Consuta Habilitação de Áudio",
+      "pattern": "$TEXT_OP:AUDIO",
+      "description": "Consuta Habilitação de Áudio",
+      "example": "$TEXT_OP:AUDIO",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Áudio desligado\n1 = Áudio ligado"
+    },
+    {
+      "id": "habilita_desabilita_gravacao_estacionado",
+      "name": "Habilita/Desabilita Gravação Estacionado",
+      "pattern": "$TEXT_OP:PAKING_MON:",
+      "description": "Habilita/Desabilita Gravação Estacionado",
+      "example": "$TEXT_OP:PAKING_MON:0",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Monitoramento desligado quando estacionado\n1 = Manter monitoramento quando estacionado"
+    },
+    {
+      "id": "consulta_habilitacao_de_gravacao_estacionado",
+      "name": "Consulta Habilitação de Gravação Estacionado",
+      "pattern": "$TEXT_OP:PAKING_MON",
+      "description": "Consulta Habilitação de Gravação Estacionado",
+      "example": "$TEXT_OP:PAKING_MON",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_tempo_de_gravacao_estacionado",
+      "name": "Configura tempo de gravação estacionado",
+      "pattern": "$TEXT_OP:PAKING_TIME:",
+      "description": "Configura tempo de gravação estacionado",
+      "example": "$TEXT_OP:PAKING_TIME:60",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Tempo em minutos; 0 ou vazio = para sempre"
+    },
+    {
+      "id": "consulta_tempo_de_gravacao_estacionado",
+      "name": "Consulta tempo de gravação estacionado",
+      "pattern": "$TEXT_OP:PAKING_TIME",
+      "description": "Consulta tempo de gravação estacionado",
+      "example": "$TEXT_OP:PAKING_TIME",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "habilita_desabilita_cameras",
+      "name": "Habilita/Desabilita câmeras",
+      "pattern": "$TEXT_OP:EN_CAM:",
+      "description": "Habilita/Desabilita câmeras",
+      "example": "$TEXT_OP:EN_CAM:0,1",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Desligado\n1 = Ligado"
+    },
+    {
+      "id": "consulta_habilitacao_das_cameras",
+      "name": "Consulta Habilitação das câmeras",
+      "pattern": "$TEXT_OP:EN_CAM",
+      "description": "Consulta Habilitação das câmeras",
+      "example": "$TEXT_OP:EN_CAM",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Desligado\n1 = Ligado"
+    },
+    {
+      "id": "configura_voltagem_minima",
+      "name": "Configura voltagem mínima",
+      "pattern": "$TEXT_OP:LOW_VOLTAGE:",
+      "description": "Configura voltagem mínima",
+      "example": "$TEXT_OP:LOW_VOLTAGE:115",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Limite em 0,1V. Abaixo desta voltagem a câmera desliga para proteger a bateria do veículo"
+    },
+    {
+      "id": "consulta_a_voltagem_minima",
+      "name": "Consulta a voltagem mínima",
+      "pattern": "$TEXT_OP:LOW_VOLTAGE",
+      "description": "Consulta a voltagem mínima",
+      "example": "$TEXT_OP:LOW_VOLTAGE",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "Limite em 0,1V. Abaixo desta voltagem a câmera desliga para proteger a bateria do veículo"
+    },
+    {
+      "id": "configura_a_conducao_brusca",
+      "name": "Configura a condução brusca",
+      "pattern": "$TEXT_OP:SET_INTEN:",
+      "description": "Configura a condução brusca",
+      "example": "$TEXT_OP:SET_INTEN:1,0,1,10,1,30,1,10",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Switch: 0 = Desligado; 1 = Ligado"
+    },
+    {
+      "id": "consulta_conducao_brusca",
+      "name": "Consulta condução brusca",
+      "pattern": "$TEXT_OP:INTEN",
+      "description": "Consulta condução brusca",
+      "example": "$TEXT_OP:INTEN",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_video_automatico_por_impacto",
+      "name": "Configura vídeo automático por impacto",
+      "pattern": "$TEXT_OP:SET_CRASH:",
+      "description": "Configura vídeo automático por impacto",
+      "example": "$TEXT_OP:SET_CRASH:1,60",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Desabilitar; 1 = Habilitar\nDuração do vídeo em segundos"
+    },
+    {
+      "id": "consulta_video_automatico_por_impacto",
+      "name": "Consulta vídeo automático por impacto",
+      "pattern": "$TEXT_OP:CRASH",
+      "description": "Consulta vídeo automático por impacto",
+      "example": "$TEXT_OP:CRASH",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_tempo_de_rebote_de_alarmes",
+      "name": "Configura tempo de rebote de alarmes",
+      "pattern": "$TEXT_OP:SET_ALARM_INTERVAL:",
+      "description": "Configura tempo de rebote de alarmes",
+      "example": "$TEXT_OP:SET_ALARM_INTERVAL:FCW,10",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Alarmes:\nFCW = Colisão frontal\nHMW = Veículo muito próximo\nLDW = Desvio de faixa\nPCW = Reconhecimento de pedestre\nSTG = Stop & Go\nDFW = Dirigir com fadiga\nCALL = Uso de telefone\nFSW = Condução distraída\nYCW = Anormalidade do motorista\nHID = Oclusão da câmera\nSMK = Alarme de fumo\nSEATBELT = Cinto de segurança\nSUNGLASS = Bloqueio infravermelho\n\ntempo está em segundos"
+    },
+    {
+      "id": "consulta_tempo_de_rebote_de_alarmes",
+      "name": "Consulta tempo de rebote de alarmes",
+      "pattern": "$TEXT_OP:ALARM_INTERVAL",
+      "description": "Consulta tempo de rebote de alarmes",
+      "example": "$TEXT_OP:ALARM_INTERVAL",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "habilita_desabilita_alarmes",
+      "name": "Habilita/Desabilita alarmes",
+      "pattern": "$TEXT_OP:SET_ALARM_ENABLE:",
+      "description": "Habilita/Desabilita alarmes",
+      "example": "$TEXT_OP:SET_ALARM_ENABLE:FCW,0",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = Desabilitar  1 = Habilitar\nEste é o interruptor principal do alarme. Se ligado, seguirá a definição de sensibilidade do alarme"
+    },
+    {
+      "id": "consulta_habilitacao_de_alarmes",
+      "name": "Consulta Habilitação de Alarmes",
+      "pattern": "$TEXT_OP:ALARM_ENABLE",
+      "description": "Consulta Habilitação de Alarmes",
+      "example": "$TEXT_OP:ALARM_ENABLE",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_a_sensibilidade_de_alarmes",
+      "name": "Configura a sensibilidade de alarmes",
+      "pattern": "$TEXT_OP:SET_ALARM_LEVEL:",
+      "description": "Configura a sensibilidade de alarmes",
+      "example": "$TEXT_OP:SET_ALARM_LEVEL:FCW,OFF",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Valores de sensibilidade:\nOFF = Desligado\nLOW = Baixo\nMID = Médio\nHIGH = Alto"
+    },
+    {
+      "id": "consulta_sensibilidade_de_alarmes",
+      "name": "Consulta sensibilidade de alarmes",
+      "pattern": "$TEXT_OP:ALARM_LEVEL",
+      "description": "Consulta sensibilidade de alarmes",
+      "example": "$TEXT_OP:ALARM_LEVEL",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_a_velocidade_minima_de_alarmes",
+      "name": "Configura a velocidade mínima de alarmes",
+      "pattern": "$TEXT_OP:SET_ALARM_SPEED:",
+      "description": "Configura a velocidade mínima de alarmes",
+      "example": "$TEXT_OP:SET_ALARM_SPEED:LDW,30",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "velocidade mínima até 90Km/h em múltiplos de 10"
+    },
+    {
+      "id": "consulta_a_velocidade_minima_de_alarmes",
+      "name": "Consulta a velocidade mínima de alarmes",
+      "pattern": "$TEXT_OP:ALARM_SPEED",
+      "description": "Consulta a velocidade mínima de alarmes",
+      "example": "$TEXT_OP:ALARM_SPEED",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_a_qualidade_de_video",
+      "name": "Configura a qualidade de vídeo",
+      "pattern": "$TEXT_OP:SET_VIDEO:",
+      "description": "Configura parâmetros de resolução das câmeras",
+      "example": "$TEXT_OP:SET_VIDEO:1-1080P_4096K_360P_512K,2-1080P_4096K_360P_512K,3-1080P_4096K_360P_512K",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "- Suporta múltiplos ou único canal.\n- Parâmetros:\nch-ResMain_Bitrate_ResSub_Bitrate\n- Separar blocos de múltiplos canais com vírgulas.\n- Dispositivo irá reiniciar após receber este comando.\n\nParâmetros suportados:\nResolução principal: 1080P/720P/480P/360P\nResolução secundária: 480P/360P\nBitrate 1080P: 1.000.000 ~ 12.000.000\nBitrate 720P: 100.000 ~ 5.000.000\nBitrate 360P/480P: 100.000 ~ 250.000"
+    },
+    {
+      "id": "consulta_a_qualidade_de_video",
+      "name": "Consulta a qualidade de vídeo",
+      "pattern": "$TEXT_OP:VIDEO",
+      "description": "Consulta parâmetros de resolução das câmeras",
+      "example": "$TEXT_OP:VIDEO",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_tipos_de_midia_para_alarmes",
+      "name": "Configura tipos de mídia para alarmes",
+      "pattern": "$TEXT_OP:SET_ALARM_MEDIA:",
+      "description": "Configura mídia para alarmes",
+      "example": "$TEXT_OP:SET_ALARM_MEDIA:FCW,0,1",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "Vídeo pode ser apenas 0 ou 5\n0 = sem vídeo\n5 = vídeo de 10seg (5 antes e 5 depois do alarme)\n\nImagem pode ser:\n0 = sem fotos\n1 a 3 = quantidade de fotos"
+    },
+    {
+      "id": "consulta_tipos_de_midia_para_alarmes",
+      "name": "Consulta tipos de mídia para alarmes",
+      "pattern": "$TEXT_OP:ALARM_MEDIA",
+      "description": "Consulta mídia para alarmes",
+      "example": "$TEXT_OP:ALARM_MEDIA",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "configura_idioma",
+      "name": "Configura idioma",
+      "pattern": "$TEXT_OP:SET_LANGUAGE:",
+      "description": "Configura idioma",
+      "example": "$TEXT_OP:SET_LANGUAGE:1",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0 = chinês\n1 = inglês\n3 = tailandês\n5 = português (PT)\n12 = português (BR)"
+    },
+    {
+      "id": "consulta_idioma",
+      "name": "Consulta idioma",
+      "pattern": "$TEXT_OP:LANGUAGE",
+      "description": "Consulta idioma",
+      "example": "$TEXT_OP:LANGUAGE",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    },
+    {
+      "id": "upload_log",
+      "name": "Upload Log",
+      "pattern": "$TEXT_OP:FTP_LOG:",
+      "description": "Faz upload do log no FTP",
+      "example": "$TEXT_OP:FTP_LOG:185.51.5.186,30110,admin,12345678,/LOG",
+      "success_patterns": ["will upload log"],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "Login/senha FTP não podem conter '@'"
+    },
+    {
+      "id": "atualiza_firmware",
+      "name": "Atualiza Firmware",
+      "pattern": "$TEXT_OP:FTP_UPDATE:",
+      "description": "Atualização remota de firmware",
+      "example": "$TEXT_OP:FTP_UPDATE:189.50.5.186,30110,setera,XBX43V4bHAYbVYSD6Jhb,/FW/AT602_6.2.35.crc",
+      "success_patterns": ["will download ota"],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": "Login/senha FTP não podem conter '@'\nNome do arquivo de firmware deve seguir o padrão AT602_6.2.35"
+    },
+    {
+      "id": "adas_altura_da_camera",
+      "name": "ADAS - Altura da câmera",
+      "pattern": "$TEXT_OP:SET_ADAS_CALIB:CAMERA_HEIGHT",
+      "description": "ADAS - Altura da câmera",
+      "example": "$TEXT_OP:SET_ADAS_CALIB:CAMERA_HEIGHT,180",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "100–500 cm"
+    },
+    {
+      "id": "adas_distancia_para_o_para_choque",
+      "name": "ADAS - Distância para o para-choque",
+      "pattern": "$TEXT_OP:SET_ADAS_CALIB:TO_FRONT_BUMPER",
+      "description": "ADAS - Distância para o para-choque",
+      "example": "$TEXT_OP:SET_ADAS_CALIB:TO_FRONT_BUMPER,90",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "0–200 cm"
+    },
+    {
+      "id": "adas_distancia_para_a_roda_esquerda",
+      "name": "ADAS - Distância para a roda esquerda",
+      "pattern": "$TEXT_OP:SET_ADAS_CALIB:TO_LEFT_WHEEL",
+      "description": "ADAS - Distância para a roda esquerda",
+      "example": "$TEXT_OP:SET_ADAS_CALIB:TO_LEFT_WHEEL,110",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "50–200 cm"
+    },
+    {
+      "id": "adas_distancia_para_a_roda_direita",
+      "name": "ADAS - Distância para a roda direita",
+      "pattern": "$TEXT_OP:SET_ADAS_CALIB:TO_RIGHT_WHEEL",
+      "description": "ADAS - Distância para a roda direita",
+      "example": "$TEXT_OP:SET_ADAS_CALIB:TO_RIGHT_WHEEL,110",
+      "success_patterns": [
+        "setting success"
+      ],
+      "failure_patterns": [
+        "setting fail"
+      ],
+      "case_sensitive": true,
+      "explanation_pt": "50–200 cm"
+    },
+    {
+      "id": "adas_consulta_medidas_da_camera",
+      "name": "ADAS - Consulta medidas da câmera",
+      "pattern": "$TEXT_OP:ADAS_CALIB",
+      "description": "ADAS - Consulta medidas da câmera",
+      "example": "$TEXT_OP:ADAS_CALIB",
+      "success_patterns": [],
+      "failure_patterns": [],
+      "case_sensitive": true,
+      "explanation_pt": ""
+    }
+  ]
+}

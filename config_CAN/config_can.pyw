@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 SETERA - Atualização e Configuração - Leitor CANBUS
-Versão: 1.4
-Data: 16Out2025
+Versão: 1.7
+Data: 17Out2025
 Descrição: Software para atualização de firmware e configuração de dispositivos leitores CANBUS
 """
 
@@ -130,9 +130,30 @@ class CANBusUpdater:
             if len(matched_files) == 0:
                 return ([], f"Nenhum arquivo de firmware encontrado para o número de série {serial_number}")
             elif len(matched_files) > 1:
-                file_list = "\n".join([os.path.basename(f[0]) for f in matched_files])
-                error_msg = f"Múltiplos arquivos de firmware encontrados para o número de série {serial_number}:\n\n{file_list}\n\nPor favor, deixe apenas o arquivo mais recente na pasta e tente novamente."
-                return ([], error_msg)
+                # Multiple files found - select the one with the highest version
+                self.log_message(f"Múltiplos arquivos encontrados para SN {serial_number}:", 'info')
+
+                # Log all files found
+                for file_path, version in matched_files:
+                    self.log_message(f"  - {os.path.basename(file_path)} (versão {version})", 'info')
+
+                # Create list of tuples with (file_path, version, parsed_version_tuple)
+                files_with_parsed_versions = []
+                for file_path, version in matched_files:
+                    parsed = self.parse_version(version)
+                    files_with_parsed_versions.append((file_path, version, parsed))
+
+                # Sort by parsed version tuple (descending order)
+                # Tuple comparison works perfectly: (3, 1, 12, '') > (3, 0, 22, 'b')
+                files_with_parsed_versions.sort(key=lambda x: x[2], reverse=True)
+
+                # Get the highest version file
+                highest_file_path, highest_version, _ = files_with_parsed_versions[0]
+
+                self.log_message(f"Selecionado automaticamente: {os.path.basename(highest_file_path)} (versão {highest_version})", 'success')
+
+                # Return only the highest version file
+                return ([(highest_file_path, highest_version)], None)
             else:
                 return (matched_files, None)
 
@@ -215,7 +236,7 @@ class CANBusUpdater:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Atualização e Configuração - Leitor CANBUS - v1.4 - 16Out2025")
+        self.root.title("Atualização e Configuração - Leitor CANBUS - v1.7 - 17Out2025")
         self.root.geometry("900x700")
         self.root.state('zoomed')  # Start maximized
         self.root.resizable(True, True)
@@ -292,17 +313,16 @@ class CANBusUpdater:
         top_frame = ttk.Frame(self.root, padding="10")
         top_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N), padx=5, pady=5)
 
-        # COM Port selection
-        ttk.Label(top_frame, text="Porta COM:").grid(row=0, column=0, sticky=tk.W, padx=5)
+        # COM Port selection (no label, just dropdown)
         self.com_port_var = tk.StringVar()
         self.com_port_combo = ttk.Combobox(top_frame, textvariable=self.com_port_var,
                                            width=15, state='readonly')
-        self.com_port_combo.grid(row=0, column=1, padx=5)
+        self.com_port_combo.grid(row=0, column=0, padx=5)
 
         # Connect/Disconnect button
         self.connect_button = ttk.Button(top_frame, text="CONECTAR",
                                          command=self.toggle_connection, width=15)
-        self.connect_button.grid(row=0, column=2, padx=10)
+        self.connect_button.grid(row=0, column=1, padx=10)
 
         # Configure button styles with proper color mapping
         self.button_style = ttk.Style()
@@ -323,7 +343,13 @@ class CANBusUpdater:
         self.update_button = ttk.Button(top_frame, text="INICIAR UPDATE",
                                         command=self.start_firmware_update, width=20,
                                         state='disabled', style='Red.TButton')
-        self.update_button.grid(row=0, column=3, padx=10)
+        self.update_button.grid(row=0, column=2, padx=10)
+
+        # Configure button (standalone configuration without firmware update)
+        self.configure_button = ttk.Button(top_frame, text="CONFIGURAR",
+                                          command=self.on_configure_button_clicked, width=15,
+                                          state='disabled', style='Red.TButton')
+        self.configure_button.grid(row=0, column=3, padx=10)
 
         # Clear Log button
         self.clear_log_button = ttk.Button(top_frame, text="LIMPAR LOG",
@@ -455,6 +481,7 @@ class CANBusUpdater:
         self.auto_update_mode = False
 
         self.connect_button.config(text="CONECTAR")
+        self.configure_button.config(state='disabled', style='Red.TButton')
         self.update_button.config(state='disabled', style='Red.TButton')
         self.device_label.config(text="Dispositivo: Desconectado", foreground="gray")
         self.log_message("Desconectado da porta COM", 'info')
@@ -581,9 +608,10 @@ class CANBusUpdater:
                 self.root.after(0, self.show_versions_failure_popup, error_msg)
                 return
 
-            # Device is ready, enable update button
+            # Device is ready, enable update and configure buttons
             if self.device_ready:
-                self.log_message("Dispositivo pronto para atualização", 'success')
+                self.log_message("Dispositivo pronto para atualização e configuração", 'success')
+                self.root.after(0, lambda: self.configure_button.config(state='normal', style='Green.TButton'))
                 self.root.after(0, lambda: self.update_button.config(state='normal', style='Green.TButton'))
 
                 # Start FR1 activity monitoring on main thread
@@ -640,9 +668,10 @@ class CANBusUpdater:
                     # Check if button is currently enabled and we're not in the middle of an update
                     if (self.update_button['state'] == 'normal' and
                         not self.update_in_progress):
-                        # Disable button
+                        # Disable buttons
+                        self.configure_button.config(state='disabled', style='Red.TButton')
                         self.update_button.config(state='disabled', style='Red.TButton')
-                        self.log_message("Dispositivo entrou em modo dormante, botão desabilitado", 'info')
+                        self.log_message("Dispositivo entrou em modo dormante, botões desabilitados", 'info')
 
             # Schedule next check in 1 second
             if self.monitoring_active:
@@ -692,10 +721,11 @@ class CANBusUpdater:
                                     self.fr1_received = True
                                     self.last_fr1_time = time.time()
 
-                                    # If device is ready but button is disabled, re-enable it
+                                    # If device is ready but buttons are disabled, re-enable them
                                     if self.device_ready and self.update_button['state'] == 'disabled' and not self.update_in_progress:
+                                        self.root.after(0, lambda: self.configure_button.config(state='normal', style='Green.TButton'))
                                         self.root.after(0, lambda: self.update_button.config(state='normal', style='Green.TButton'))
-                                        self.log_message("Dispositivo reativado, botão habilitado", 'info')
+                                        self.log_message("Dispositivo reativado, botões habilitados", 'info')
 
                                 # Process received data for responses
                                 if self.waiting_for_response:
@@ -967,6 +997,56 @@ class CANBusUpdater:
             self.log_message(f"Erro durante configuração: {str(e)}", 'error')
             self.root.after(0, lambda: self.configure_button.config(state='normal', style='Green.TButton'))
 
+    def perform_standalone_configuration(self, speed, rpm):
+        """Perform standalone LIMITS configuration and start auto-polling after success"""
+        try:
+            self.log_message("=== CONFIGURAÇÃO STANDALONE - INICIANDO ===", 'info')
+            self.log_message(f"Velocidade Máxima: {speed} km/h", 'info')
+            self.log_message(f"Limite RPM: {rpm} (múltiplo de 64)", 'info')
+
+            # Disable configure button during configuration
+            self.root.after(0, lambda: self.configure_button.config(state='disabled', style='Red.TButton'))
+
+            # Send LIMITS command with retry mechanism (3 attempts, 2 seconds apart)
+            max_retries = 3
+            retry_count = 0
+            config_success = False
+
+            while retry_count < max_retries and not config_success:
+                if retry_count > 0:
+                    self.log_message(f"Tentativa {retry_count + 1} de {max_retries}...", 'info')
+
+                # Send LIMITS command: LIMITS,{speed},0,{rpm}
+                command = f"LIMITS,{speed},0,{rpm}"
+                response = self.send_serial(command, wait_for_response=True, timeout=2.0, expected_prefix="LIMITS")
+
+                if response and "OK" in response:
+                    config_success = True
+                    self.log_message("Configuração aplicada com sucesso!", 'success')
+                else:
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        self.log_message("Sem resposta, aguardando 2 segundos para nova tentativa...", 'info')
+                        time.sleep(2.0)
+
+            if not config_success:
+                # All retries failed
+                error_msg = "Falha ao aplicar configuração após 3 tentativas.\n\nVerifique:\n- Reinicie o dispositivo\n- Verifique as conexões\n- Tente novamente"
+                self.log_message("Erro: Falha na configuração após 3 tentativas", 'error')
+                self.root.after(0, self.show_config_failure_popup, error_msg)
+            else:
+                # Configuration successful - show success popup
+                self.log_message("=== CONFIGURAÇÃO CONCLUÍDA COM SUCESSO ===", 'success')
+                self.root.after(0, self.show_standalone_config_success_popup)
+                # Note: Auto-polling will be started after user clicks OK on success popup
+
+            # Re-enable configure button
+            self.root.after(0, lambda: self.configure_button.config(state='normal', style='Green.TButton'))
+
+        except Exception as e:
+            self.log_message(f"Erro durante configuração standalone: {str(e)}", 'error')
+            self.root.after(0, lambda: self.configure_button.config(state='normal', style='Green.TButton'))
+
     def select_firmware(self):
         """Open folder dialog to search for firmware file matching device serial number"""
         # Check if device serial number is available
@@ -1113,33 +1193,40 @@ class CANBusUpdater:
             info_text = f"Firmware: {filename_only} | Versão: {file_version} | Frames: {self.firmware_info.get('num_frames', 0)}"
             self.root.after(0, lambda: self.firmware_label.config(text=info_text, foreground="blue"))
 
-            # Compare versions and show confirmation (speeds and RPM are already stored)
+            # Compare versions and decide if confirmation is needed
             version_comparison = self.compare_versions(self.firmware_file_version, self.device_fw_version)
 
-            # Build confirmation message
-            base_msg = f"Firmware:\n  Versão do Arquivo: {self.firmware_file_version}\n  Versão Atual do Dispositivo: {self.device_fw_version}\n  Frames: {len(self.firmware_frames)}\n\nConfiguração:\n  Vel Máx: {self.speed_limit} km/h\n  Limite RPM: {self.rpm_limit} RPM\n\n"
+            # Only show confirmation for downgrade or same version
+            # For newer versions, proceed automatically
+            show_confirmation = (version_comparison <= 0)
 
-            # Add version-specific warning
-            if version_comparison < 0:
-                confirmation_msg = "⚠️ ATENÇÃO: DOWNGRADE DE FIRMWARE ⚠️\n\n" + base_msg
-                confirmation_msg += "A versão do arquivo é MAIS ANTIGA que a versão atual do dispositivo.\n\n"
-                confirmation_msg += "Deseja continuar com o downgrade?"
-                title = "Confirmar Downgrade"
-            elif version_comparison == 0:
-                confirmation_msg = "⚠️ ATENÇÃO: MESMA VERSÃO ⚠️\n\n" + base_msg
-                confirmation_msg += "A versão do arquivo é IGUAL à versão atual do dispositivo.\n\n"
-                confirmation_msg += "Deseja continuar com a reinstalação?"
-                title = "Confirmar Reinstalação"
+            if show_confirmation:
+                # Build confirmation message for downgrade or same version
+                base_msg = f"Firmware:\n  Versão do Arquivo: {self.firmware_file_version}\n  Versão Atual do Dispositivo: {self.device_fw_version}\n  Frames: {len(self.firmware_frames)}\n\nConfiguração:\n  Vel Máx: {self.speed_limit} km/h\n  Limite RPM: {self.rpm_limit} RPM\n\n"
+
+                # Add version-specific warning
+                if version_comparison < 0:
+                    confirmation_msg = "⚠️ ATENÇÃO: DOWNGRADE DE FIRMWARE ⚠️\n\n" + base_msg
+                    confirmation_msg += "A versão do arquivo é MAIS ANTIGA que a versão atual do dispositivo.\n\n"
+                    confirmation_msg += "Deseja continuar com o downgrade?"
+                    title = "Confirmar Downgrade"
+                else:  # version_comparison == 0
+                    confirmation_msg = "⚠️ ATENÇÃO: MESMA VERSÃO ⚠️\n\n" + base_msg
+                    confirmation_msg += "A versão do arquivo é IGUAL à versão atual do dispositivo.\n\n"
+                    confirmation_msg += "Deseja continuar com a reinstalação?"
+                    title = "Confirmar Reinstalação"
+
+                # Show confirmation dialog
+                result = messagebox.askyesno(title, confirmation_msg)
             else:
-                confirmation_msg = "Iniciar atualização de firmware e configuração?\n\n" + base_msg
-                confirmation_msg += "O dispositivo será atualizado e configurado automaticamente."
-                title = "Confirmar Atualização Automática"
-
-            # Show confirmation dialog
-            result = messagebox.askyesno(title, confirmation_msg)
+                # Newer firmware version - proceed automatically without confirmation
+                self.log_message(f"Firmware mais recente detectado ({self.firmware_file_version} > {self.device_fw_version})", 'info')
+                self.log_message("Prosseguindo automaticamente com atualização e configuração...", 'success')
+                result = True  # Auto-confirm for newer versions
 
             if result:
                 self.update_in_progress = True
+                self.configure_button.config(state='disabled', style='Red.TButton')
                 self.update_button.config(state='disabled', style='Red.TButton')
                 self.connect_button.config(state='disabled')
 
@@ -1156,6 +1243,31 @@ class CANBusUpdater:
             messagebox.showerror("Erro", f"Erro na atualização automática:\n{str(e)}")
             # Restart polling
             self.start_auto_update_polling()
+
+    def on_configure_button_clicked(self):
+        """Handle CONFIGURAR button click - standalone configuration without firmware update"""
+        if not self.is_connected:
+            messagebox.showwarning("Aviso", "Conecte-se à porta COM primeiro!")
+            return
+
+        if self.update_in_progress:
+            messagebox.showwarning("Aviso", "Uma atualização já está em andamento!")
+            return
+
+        # Show configuration dialog
+        config_confirmed = self.open_configure_dialog()
+
+        # If user canceled configuration, abort
+        if not config_confirmed:
+            return
+
+        # User confirmed - start standalone configuration with auto-polling after success
+        self.log_message("=== INICIANDO CONFIGURAÇÃO STANDALONE ===", 'info')
+
+        # Start configuration in separate thread
+        config_thread = threading.Thread(target=self.perform_standalone_configuration,
+                                         args=(self.speed_limit, self.rpm_limit), daemon=True)
+        config_thread.start()
 
     def start_firmware_update(self):
         """Start firmware update process with configuration"""
@@ -1211,6 +1323,7 @@ class CANBusUpdater:
 
         if result:
             self.update_in_progress = True
+            self.configure_button.config(state='disabled', style='Red.TButton')
             self.update_button.config(state='disabled', style='Red.TButton')
             self.connect_button.config(state='disabled')
 
@@ -1261,12 +1374,8 @@ class CANBusUpdater:
             total_frames = len(self.firmware_frames)
             self.current_frame_index = 0
 
-            # Enable frame logging suppression for firmware data frames (but not for first 5 frames in V2 debug mode)
+            # Enable frame logging suppression for firmware data frames
             self.suppress_frame_logging = True
-
-            # Log first few frames for V2 debug
-            if self.device_is_v2:
-                self.log_message("=== MODO DEBUG V2: Primeiros 5 frames serão logados ===", 'info')
 
             for i, frame in enumerate(self.firmware_frames):
                 if not self.update_in_progress:
@@ -1278,22 +1387,10 @@ class CANBusUpdater:
                 # Update progress bar
                 self.root.after(0, self.update_progress, progress)
 
-                # Temporarily disable suppression for first 5 frames in V2 mode
-                if self.device_is_v2 and i < 5:
-                    self.suppress_frame_logging = False
-                    self.log_message(f"[DEBUG V2] Enviando frame {i+1}/{total_frames}", 'info')
-                elif self.device_is_v2 and i == 5:
-                    self.suppress_frame_logging = True
-                    self.log_message("=== FIM DEBUG V2: Suprimindo logs de frames seguintes ===", 'info')
-
                 # Send frame and wait for acknowledgment
                 # V2 protocol: Each frame gets "@FRM:OK" response (with colon)
                 # V3 protocol: May be different
                 response = self.send_serial(frame, wait_for_response=True, timeout=2.0, expected_prefix=None)
-
-                # Re-enable suppression if we disabled it for debug
-                if self.device_is_v2 and i < 5:
-                    self.suppress_frame_logging = True
 
                 # Accept both "@FRM:OK" (V2, with colon) and other OK responses (V3)
                 if not response or "OK" not in response:
@@ -1369,6 +1466,7 @@ class CANBusUpdater:
     def update_complete(self):
         """Called when firmware update and configuration complete successfully"""
         self.update_in_progress = False
+        self.configure_button.config(state='normal', style='Green.TButton')
         self.update_button.config(state='normal', style='Green.TButton')
         self.connect_button.config(state='normal')
         self.progress_var.set(100)
@@ -1384,6 +1482,7 @@ class CANBusUpdater:
     def update_failed(self, error_msg):
         """Called when firmware update fails"""
         self.update_in_progress = False
+        self.configure_button.config(state='normal', style='Green.TButton')
         self.update_button.config(state='normal', style='Green.TButton')
         self.connect_button.config(state='normal')
         self.log_message("=== ATUALIZAÇÃO FALHOU ===", 'error')
@@ -1414,6 +1513,12 @@ class CANBusUpdater:
         """Show success popup after configuration is applied successfully"""
         messagebox.showinfo("Sucesso", "Configuração aplicada com sucesso!")
         # Keep COM port open
+
+    def show_standalone_config_success_popup(self):
+        """Show success popup after standalone configuration and start auto-polling"""
+        messagebox.showinfo("Sucesso", "Configuração aplicada com sucesso!\n\nAguardando próximo dispositivo...")
+        # After user clicks OK, start auto-polling for next device
+        self.start_auto_update_polling()
 
     def show_config_failure_popup(self, error_msg):
         """Show failure popup after configuration fails and disconnect"""

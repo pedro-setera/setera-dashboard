@@ -80,6 +80,17 @@ dashboard-electron/
 
 ## 📝 Changelog
 
+### v1.60 - 20Out2025
+- **Novo**: Adicionado "Config STR-CAM via SMS" na seção Configuração e Atualização
+  - Sistema automatizado de envio de comandos SMS para múltiplos dispositivos GPS STR-CAM
+  - Interface gráfica moderna com ttkbootstrap (tema escuro)
+  - Integração com API SETERA para busca automática de terminais STR-CAM
+  - Multi-seleção de terminais e command queue builder (3 terminais × 2 comandos = 6 entradas)
+  - Sistema inteligente de validação de respostas com pattern matching
+  - Monitoramento em tempo real com código de cores e logs detalhados
+  - Suporte a Arduino Uno R4 + Shield SIM800C para envio de SMS via AT commands
+  - Controles de pausa/retomada, importação em lote e exportação de logs
+
 ### v1.59 - 17Out2025
 - **Novo**: Adicionado "Atualiza Módulo Áudio" na seção Configuração e Atualização
   - Ferramenta para atualização de firmware do módulo de áudio WTV380/Waytronic via UART

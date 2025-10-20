@@ -1,0 +1,49 @@
+﻿Name;Pattern;Description;Example;Success pattern;Failure pattern
+Configura Servidor Principal;$TEXT_OP:MAINSERVER:;Configura Servidor Principal;$TEXT_OP:MAINSERVER:148.63.152.25,8552,2013;setting success;setting fail
+Consulta Servidor Principal;$TEXT_OP:MAINSERVER;Consulta Servidor Principal;$TEXT_OP:MAINSERVER;;
+Configura Servidor Secundário;$TEXT_OP:SUBSERVER:;Configura Servidor Secundário;$TEXT_OP:SUBSERVER:192.168.0.0,8808,2013;setting success;setting fail
+Consulta Servidor Secundário;$TEXT_OP:SUBSERVER;Consulta Servidor Secundário;$TEXT_OP:SUBSERVER;;
+Configura APN;$TEXT_OP:APN:;Configura APN;$TEXT_OP:APN:460,00,CMNET;setting success;setting fail
+Consulta APN;$TEXT_OP:APN;Consulta APN;$TEXT_OP:APN;;
+Configura Fuso Horário;$TEXT_OP:TIMEZONE:;Configura Fuso Horário;$TEXT_OP:TIMEZONE:UTC-3;setting success;setting fail
+Consulta Fuso Horário;$TEXT_OP:TIMEZONE;Consulta Fuso Horário;$TEXT_OP:TIMEZONE;;
+Consulta Dados da Câmera;$TEXT_OP:DEVICEINFO;Consulta Dados Gerais da Câmera;$TEXT_OP:DEVICEINFO;;
+Configura Tamanho Vídeos;$TEXT_OP:LOOP_REC:;Configura Tempo de Gravação dos Vídeos;$TEXT_OP:LOOP_REC:1;setting success;setting fail
+Consulta Tamanho Vídeos;$TEXT_OP:LOOP_REC;Consulta Tempo de Gravação dos Vídeos;$TEXT_OP:LOOP_REC;;
+Configura Volume;$TEXT_OP:SET_VOLUME:;Configura Volume do Áudio;$TEXT_OP:SET_VOLUME:OFF;setting success;setting fail
+Consulta Volume;$TEXT_OP:VOLUME;Consulta Volume do Áudio;$TEXT_OP:VOLUME;;
+Habilita/Desabilita Áudio;$TEXT_OP:AUDIO:;Habilita/Desabilita Áudio;$TEXT_OP:AUDIO:0;setting success;setting fail
+Consuta Habilitação de Áudio;$TEXT_OP:AUDIO;Consuta Habilitação de Áudio;$TEXT_OP:AUDIO;;
+Habilita/Desabilita Gravação Estacionado;$TEXT_OP:PAKING_MON:;Habilita/Desabilita Gravação Estacionado;$TEXT_OP:PAKING_MON:0 ;setting success;setting fail
+Consulta Habilitação de Gravação Estacionado;$TEXT_OP:PAKING_MON;Consulta Habilitação de Gravação Estacionado;$TEXT_OP:PAKING_MON;;
+Configura tempo de gravação estacionado;$TEXT_OP:PAKING_TIME:;Configura tempo de gravação estacionado;$TEXT_OP:PAKING_TIME:60;setting success;setting fail
+Consulta tempo de gravação estacionado;$TEXT_OP:PAKING_TIME;Consulta tempo de gravação estacionado;$TEXT_OP:PAKING_TIME;;
+Habilita/Desabilita câmeras;$TEXT_OP:EN_CAM:;Habilita/Desabilita câmeras;$TEXT_OP:EN_CAM:0,1;setting success;setting fail
+Consulta Habilitação das câmeras;$TEXT_OP:EN_CAM;Consulta Habilitação das câmeras;$TEXT_OP:EN_CAM;;
+Configura voltagem mínima;$TEXT_OP:LOW_VOLTAGE:;Configura voltagem mínima;$TEXT_OP:LOW_VOLTAGE:115;setting success;setting fail
+Consulta a voltagem mínima;$TEXT_OP:LOW_VOLTAGE;Consulta a voltagem mínima;$TEXT_OP:LOW_VOLTAGE;;
+Configura a condução brusca;$TEXT_OP:SET_INTEN:;Configura a condução brusca;$TEXT_OP:SET_INTEN:1,0,1,10,1,30,1,10;setting success;setting fail
+Consulta condução brusca;$TEXT_OP:INTEN;Consulta condução brusca;$TEXT_OP:INTEN;;
+Configura vídeo automático por impacto;$TEXT_OP:SET_CRASH:;Configura vídeo automático por impacto;$TEXT_OP:SET_CRASH:1,60;setting success;setting fail
+Consulta vídeo automático por impacto;$TEXT_OP:CRASH;Consulta vídeo automático por impacto;$TEXT_OP:CRASH;;
+Configura tempo de rebote de alarmes;$TEXT_OP:SET_ALARM_INTERVAL:;Configura tempo de rebote de alarmes;$TEXT_OP:SET_ALARM_INTERVAL:FCW,10;setting success;setting fail
+Consulta tempo de rebote de alarmes;$TEXT_OP:ALARM_INTERVAL;Consulta tempo de rebote de alarmes;$TEXT_OP:ALARM_INTERVAL;;
+Habilita/Desabilita alarmes;$TEXT_OP:SET_ALARM_ENABLE:;Habilita/Desabilita alarmes;$TEXT_OP:SET_ALARM_ENABLE:FCW,0;setting success;setting fail
+Consulta Habilitação de Alarmes;$TEXT_OP:ALARM_ENABLE;Consulta Habilitação de Alarmes;$TEXT_OP:ALARM_ENABLE;;
+Configura a sensibilidade de alarmes;$TEXT_OP:SET_ALARM_LEVEL:;Configura a sensibilidade de alarmes;$TEXT_OP:SET_ALARM_LEVEL:FCW,OFF;setting success;setting fail
+Consulta sensibilidade de alarmes;$TEXT_OP:ALARM_LEVEL;Consulta sensibilidade de alarmes;$TEXT_OP:ALARM_LEVEL;;
+Configura a velocidade mínima de alarmes;$TEXT_OP:SET_ALARM_SPEED:;Configura a velocidade mínima de alarmes;$TEXT_OP:SET_ALARM_SPEED:LDW,30;setting success;setting fail
+Consulta a velocidade mínima de alarmes;$TEXT_OP:ALARM_SPEED;Consulta a velocidade mínima de alarmes;$TEXT_OP:ALARM_SPEED;;
+Configura a qualidade de vídeo;$TEXT_OP:SET_VIDEO:;Configura parâmetros de resolução das câmeras;$TEXT_OP:SET_VIDEO:1-1080P_4096K_360P_512K,2-1080P_4096K_360P_512K,3-1080P_4096K_360P_512K;setting success;setting fail
+Consulta a qualidade de vídeo;$TEXT_OP:VIDEO;Consulta parâmetros de resolução das câmeras;$TEXT_OP:VIDEO;;
+Configura tipos de mídia para alarmes;$TEXT_OP:SET_ALARM_MEDIA:;Configura mídia para alarmes;$TEXT_OP:SET_ALARM_MEDIA:FCW,0,1;setting success;setting fail
+Consulta tipos de mídia para alarmes;$TEXT_OP:ALARM_MEDIA;Consulta mídia para alarmes;$TEXT_OP:ALARM_MEDIA;;
+Configura idioma;$TEXT_OP:SET_LANGUAGE:;Configura idioma;$TEXT_OP:SET_LANGUAGE:1;setting success;setting fail
+Consulta idioma;$TEXT_OP:LANGUAGE;Consulta idioma;$TEXT_OP:LANGUAGE;;
+Upload Log;$TEXT_OP:FTP_LOG:;Faz upload do log no FTP;$TEXT_OP:FTP_LOG:185.51.5.186,30110,admin,12345678,/LOG;will upload log;
+Atualiza Firmware;$TEXT_OP:FTP_UPDATE:;Atualização remota de firmware;$TEXT_OP:FTP_UPDATE:189.50.5.186,30110,setera,XBX43V4bHAYbVYSD6Jhb,/FW/AT602_6.2.35.crc;will download ota;
+ADAS - Altura da câmera;$TEXT_OP:SET_ADAS_CALIB:CAMERA_HEIGHT;ADAS - Altura da câmera;$TEXT_OP:SET_ADAS_CALIB:CAMERA_HEIGHT,180;setting success;setting fail
+ADAS - Distância para o para-choque;$TEXT_OP:SET_ADAS_CALIB:TO_FRONT_BUMPER;ADAS - Distância para o para-choque;$TEXT_OP:SET_ADAS_CALIB:TO_FRONT_BUMPER,90;setting success;setting fail
+ADAS - Distância para a roda esquerda;$TEXT_OP:SET_ADAS_CALIB:TO_LEFT_WHEEL;ADAS - Distância para a roda esquerda;$TEXT_OP:SET_ADAS_CALIB:TO_LEFT_WHEEL,110;setting success;setting fail
+ADAS - Distância para a roda direita;$TEXT_OP:SET_ADAS_CALIB:TO_RIGHT_WHEEL;ADAS - Distância para a roda direita;$TEXT_OP:SET_ADAS_CALIB:TO_RIGHT_WHEEL,110;setting success;setting fail
+ADAS - Consulta medidas da câmera;$TEXT_OP:ADAS_CALIB;ADAS - Consulta medidas da câmera;$TEXT_OP:ADAS_CALIB;;
