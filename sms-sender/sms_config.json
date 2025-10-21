@@ -1,4 +1,17 @@
 {
   "port": "COM5",
-  "cameras": []
+  "cameras": [
+    {
+      "name": "abc1234",
+      "phone": "+351911143401",
+      "commands": [
+        {
+          "command": "teste21",
+          "command_type": null,
+          "status": "pending",
+          "result": ""
+        }
+      ]
+    }
+  ]
 }

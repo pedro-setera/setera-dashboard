@@ -8,6 +8,65 @@ Arduino + Shield SIM800C
 ✨ v2.1.2: UX improvements - auto-fill SIMs, fix focus loss, simplified UI
 """
 
+# ============================================================================
+# UAC ELEVATION - Request Administrator Privileges
+# ============================================================================
+import sys
+import ctypes
+import os
+
+def is_admin():
+    """Check if the script is running with administrator privileges"""
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+def request_admin():
+    """Request UAC elevation and restart the script as administrator"""
+    if not is_admin():
+        # Re-run the program with admin rights
+        try:
+            # Get the path to the Python executable
+            if getattr(sys, 'frozen', False):
+                # Running as compiled exe (PyInstaller)
+                script = sys.executable
+                params = ' '.join([f'"{arg}"' for arg in sys.argv[1:]])
+            else:
+                # Running as .pyw script
+                script = sys.executable
+                params = f'"{os.path.abspath(__file__)}"'
+
+            # Request elevation using ShellExecute
+            ctypes.windll.shell32.ShellExecuteW(
+                None,           # hwnd
+                "runas",        # operation (triggers UAC prompt)
+                script,         # file to execute
+                params,         # parameters
+                None,           # directory
+                1               # SW_SHOWNORMAL
+            )
+            sys.exit(0)  # Exit the non-elevated instance
+        except Exception as e:
+            # User cancelled UAC or error occurred
+            import tkinter as tk
+            from tkinter import messagebox
+            root = tk.Tk()
+            root.withdraw()  # Hide the root window
+            messagebox.showerror(
+                "Permissões Necessárias",
+                f"Este programa requer privilégios de administrador.\n\nErro: {e}"
+            )
+            sys.exit(1)
+    # If already admin, continue normally
+
+# Request admin privileges on startup
+request_admin()
+
+# ============================================================================
+# MAIN IMPORTS
+# ============================================================================
+
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledText
