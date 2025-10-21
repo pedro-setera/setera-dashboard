@@ -2,20 +2,20 @@
 
 A modern desktop dashboard for managing and launching SETERA's suite of development tools for STR1010, STR1010Plus, and STR2020 trackers.
 
-![SETERA Ferramentas v1.6](dashboard-electron/assets/logo.png)
+![SETERA Ferramentas v1.60](dashboard-electron/assets/logo.png)
 
 ## 🚀 Overview
 
-The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 27+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
+The SETERA Dashboard is an Electron-based desktop application that provides a unified interface to launch 30+ specialized tools for SETERA tracker development and analysis. Originally built as a Flask/Python web application, it has been migrated to Electron for instant startup times and a native desktop experience.
 
 ## 📋 Features
 
 - **Instant Startup**: Desktop application launches in under 1 second
-- **27+ Integrated Tools**: Easy access to all SETERA development utilities
+- **30+ Integrated Tools**: Easy access to all SETERA development utilities
 - **Modern Interface**: Clean, responsive design with search functionality
-- **Portable Distribution**: Single executable with no installation required
+- **Portable Distribution**: Single executable with automated installation script
 - **Administrative Privileges**: Automatic UAC elevation for tools requiring admin rights
-- **Cross-Platform**: Built with Electron for Windows, macOS, and Linux
+- **Built with Electron**: Native desktop experience with Node.js backend
 
 ## 🛠️ Tools Included
 
@@ -48,13 +48,15 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 - **SimulaCAN** - CAN bus recorder/simulator with CANalyst-II support
 - **simulador_can_visual** - Visual CAN bus simulator (now opens maximized)
 - **simulador_tilt** - Tilt sensor simulator (now opens maximized)
-- **check_cpf** - CPF validation utility
-- **config_str1010** - STR1010 configuration utility
 - **rfid-reader** - RFID card reader for MIFARE to GPS hex conversion with history tracking
+- **sms-sender** - SMS sending tool via SETERA API
+- **wtv380_serial_updater** - WTV380 Audio Module firmware updater
 
-### Configuration Tools (Separate Repositories)
-- **ConfigSTR1010** - Available at [config-fota-str1010](https://github.com/pedro-setera/config-fota-str1010)
-- **ConfigSTR1010+** - Available at [str1010plus-config-tool](https://github.com/pedro-setera/str1010plus-config-tool)
+### Configuration Tools
+- **config_str1010** - STR1010 configuration utility
+- **config_CAN** - CAN bus configuration tool with V2 device support
+- **ConfigSTR1010** - Advanced STR1010 configuration with FOTA support
+- **ConfigSTR1010+** - STR1010Plus configuration tool
 
 ## 📦 Installation & Distribution
 
@@ -87,8 +89,7 @@ The SETERA Dashboard is an Electron-based desktop application that provides a un
 #### Python Dependencies
 Install required Python packages for all tools:
 ```bash
-pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asammdf pyqtgraph pyperclip requests pyserial tkcalendar tkintermapview xlsxwriter canalystii pywin32 numpy scipy standard-telnetlib pynmea2
-
+pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asammdf pyqtgraph pyperclip requests pyserial tkcalendar tkintermapview xlsxwriter canalystii pywin32 numpy scipy standard-telnetlib pynmea2 ttkbootstrap
 ```
 
 **Note:** The following packages are required for specific tools:
@@ -108,6 +109,7 @@ pip install psycopg2-binary pandas matplotlib seaborn flask PyQt6 python-can asa
 - **asammdf**: MF4 file format support (used by `SimulaCAN`)
 - **pynmea2**: NMEA 0183 protocol parser (used by `parser_nmea`)
 - **pyserial**: Serial communication (used by `tpms-identifier`, serial monitors, and other tools)
+- **ttkbootstrap**: Modern themed Tkinter widgets (used by various GUI tools)
 
 #### Build Setup
 ```bash
@@ -146,9 +148,10 @@ setera-tools/
 ### Key Technologies
 - **Frontend**: Electron, HTML5, CSS3, JavaScript
 - **Backend**: Node.js, Express.js
-- **Python Tools**: Flask, PostgreSQL, Matplotlib, Pandas
+- **Python Tools**: Flask, PostgreSQL, Matplotlib, Pandas, PyQt6, Tkinter/ttkbootstrap
 - **Build System**: electron-builder
 - **Process Management**: Node.js child_process
+- **Version**: 1.60.0
 
 ### Build Scripts
 - `npm run dev` - Development mode with hot reload
@@ -216,5 +219,5 @@ For technical support or questions:
 
 ---
 
-**SETERA Ferramentas v1.6 - 02Out2025**
+**SETERA Ferramentas v1.60 - 20Out2025**
 Built with ❤️ using Electron and Node.js

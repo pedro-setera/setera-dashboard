@@ -29,7 +29,8 @@ $PIP_PACKAGES = @(
     "pyperclip",
     "requests",
     "tkcalendar",
-    "tkintermapview"
+    "tkintermapview",
+    "ttkbootstrap"
 )
 
 # Colors for output
