@@ -447,14 +447,14 @@ turbo_entry.pack(side=tk.LEFT, padx=5, pady=5)
 lat_label = tk.Label(lower_frame, text="Latitude:")
 lat_label.pack(side=tk.LEFT, padx=1, pady=5)
 lat_entry = tk.Entry(lower_frame, width=12)
-lat_entry.insert(0, "-19.892976")  # Default value
+lat_entry.insert(0, "41.546008")  # Default value
 lat_entry.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Longitude
 long_label = tk.Label(lower_frame, text="Longitude:")
 long_label.pack(side=tk.LEFT, padx=1, pady=5)
 long_entry = tk.Entry(lower_frame, width=12)
-long_entry.insert(0, "-44.072225")  # Default value
+long_entry.insert(0, "-8.419724")  # Default value
 long_entry.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Function to perform search and center map on result
@@ -465,7 +465,7 @@ search_entry = tk.Entry(lower_frame, width=25)
 search_entry.pack(side=tk.LEFT, padx=5, pady=5)
 
 def reset_map():
-    map_widget.set_position(-19.892976, -44.072225)  # Set initial center
+    map_widget.set_position(41.546008, -8.419724)  # Set initial center
     map_widget.set_zoom(15)  # Set initial zoom level
 
 reset_map_button = tk.Button(lower_frame, text="RESET MAPA", command=reset_map)
@@ -501,8 +501,8 @@ def add_marker_event(coords):
 map_widget = tkintermapview.TkinterMapView(root, width=1920, height=400, corner_radius=0)
 map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 map_widget.pack(expand=True, fill=tk.BOTH)
-map_widget.set_position(-19.892976, -44.072225)  # Set initial center
-map_widget.set_zoom(15)  # Set initial zoom level
+map_widget.set_position(41.546008, -8.419724)  # Set initial center
+map_widget.set_zoom(13)  # Set initial zoom level
 map_widget.add_right_click_menu_command(label="Aicionar marcador", command=add_marker_event, pass_coords=True)
 
 # Updated map click event handling to use the provided add_left_click_map_command
